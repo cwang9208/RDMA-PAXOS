@@ -16,5 +16,5 @@ SUBDIRS := \
 src/util \
 src \
 src/dare \
-src/replica-sys \
+src/db \
 src/proxy \
