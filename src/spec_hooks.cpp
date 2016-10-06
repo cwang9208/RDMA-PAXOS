@@ -142,7 +142,12 @@ extern "C" ssize_t read(int fd, void *buf, size_t count)
 	ssize_t bytes_read = orig_read(fd, buf, count);
 
 	if (bytes_read > 0 && proxy != NULL)
-		proxy_on_read(proxy, buf, bytes_read, fd);
+	{
+		struct stat sb;
+		fstat(fd, &sb);
+		if ((sb.st_mode & S_IFMT) == S_IFSOCK)
+			proxy_on_read(proxy, buf, bytes_read, fd);
+	}
 
 	return bytes_read;
 }

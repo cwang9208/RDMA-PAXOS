@@ -70,9 +70,9 @@ void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 
 void proxy_on_accept(proxy_node* proxy, int fd)
 {
-	if (is_leader())
-	{
-		leader_conn_pair* new_conn = malloc(sizeof(leader_conn_pair));
+    if (is_leader())
+    {
+        leader_conn_pair* new_conn = malloc(sizeof(leader_conn_pair));
         memset(new_conn,0,sizeof(leader_conn_pair));
 
         new_conn->key = fd;
@@ -100,7 +100,7 @@ mgr_on_close_exit:
 
 proxy_node* proxy_init()
 {
-	proxy_node* proxy = (proxy_node*)malloc(sizeof(proxy_node));
+    proxy_node* proxy = (proxy_node*)malloc(sizeof(proxy_node));
 
     if(NULL==proxy){
         err_log("PROXY : Cannot Malloc Memory For The Proxy.\n");
