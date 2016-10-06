@@ -57,17 +57,57 @@ int dare_main()
     return 0;
 }
 
-void proxy_on_read(proxy_node* proxy, void* buf, ssize_t ret, int fd)
+void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 {
+	if (is_leader())
+	{
+		struct stat sb;
+        fstat(fd, &sb);
+        if ((sb.st_mode & S_IFMT) == S_IFSOCK)
+        {
+            leader_conn_pair* conn_pair = NULL;
+            HASH_FIND_INT(proxy->leader_conn_map, &fd, conn_pair);
+            //rsm_op(ev_mgr->con_node, bytes_read, buf, P_SEND, &socket_pair->vs);
+            //rsm_op(CSM, )
+        }
+	}
 
+	return;
 }
 
-void proxy_on_accept(struct proxy_node_t* proxy, int ret)
+void proxy_on_accept(proxy_node* proxy, int fd)
 {
-	if (is_leader)
+	if (is_leader())
 	{
-	}
-	
+		leader_conn_pair* new_conn = malloc(sizeof(leader_conn_pair));
+        memset(new_conn,0,sizeof(leader_conn_pair));
+
+        new_conn->key = fd;
+        HASH_ADD_INT(proxy->leader_conn_map, key, new_conn);
+    } else {
+    }
+
+    return;	
+}
+
+void proxy_on_close(proxy_node* proxy, int fd)
+{
+    if (is_leader())
+    {
+        leader_conn_pair* conn_pair = NULL;
+        HASH_FIND_INT(proxy->leader_conn_map, &fd, conn_pair);
+        if (conn_pair == NULL)
+            goto mgr_on_close_exit;
+
+        //view_stamp close_vs = conn_pair->vs;
+        HASH_DEL(proxy->leader_conn_map, conn_pair);
+
+        //rsm_op(ev_mgr->con_node, 0, NULL, P_CLOSE, &close_vs);
+        // nop is only for sending the close() consensus result to the replicas.
+        //rsm_op(ev_mgr->con_node, 0, NULL, P_NOP, NULL);
+    }
+mgr_on_close_exit:
+    return;
 }
 
 proxy_node* proxy_init()
@@ -83,6 +123,8 @@ proxy_node* proxy_init()
 
     proxy->db_name = "node_test";
 	proxy->db_ptr = initialize_db(proxy->db_name,0);
+
+	proxy->leader_conn_map = NULL;
 
     dare_main();
 

@@ -139,10 +139,10 @@ extern "C" ssize_t read(int fd, void *buf, size_t count)
 	static orig_read_type orig_read;
 	if (!orig_read)
 		orig_read = (orig_read_type) dlsym(RTLD_NEXT, "read");
-	ssize_t ret = orig_read(fd, buf, count);
+	ssize_t bytes_read = orig_read(fd, buf, count);
 
-	if (ret > 0 && proxy != NULL)
-		proxy_on_read(proxy, buf, ret, fd);
+	if (bytes_read > 0 && proxy != NULL)
+		proxy_on_read(proxy, buf, bytes_read, fd);
 
-	return ret;
+	return bytes_read;
 }
