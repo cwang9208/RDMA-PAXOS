@@ -9,11 +9,11 @@
 
 typedef uint8_t nid_t;
 
-typedef struct leader_accept_pair_t{
-	int key;
-    view_stamp vs;
+typedef struct pair_count_t{
+	int clt_id;
+	uint64_t req_id;
     UT_hash_handle hh;
-}leader_conn_pair;
+}pair_count;
 
 typedef struct proxy_address_t{
     struct sockaddr_in s_addr;
@@ -23,7 +23,8 @@ typedef struct proxy_address_t{
 typedef struct proxy_node_t{
 	nid_t node_id; 
 	proxy_address sys_addr;
-	leader_conn_pair* leader_conn_map;
+	
+	pair_count* hash_map;
 	
 	uint8_t group_size;
 	

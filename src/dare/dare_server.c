@@ -288,6 +288,7 @@ init_server_data()
 
     /* Set up the configuration */
     data.config.idx = data.input->server_idx;
+    data.ucb = data.input->ucb;
     data.config.len = MAX_SERVER_COUNT;
     if (data.config.len < data.input->group_size) {
         error_return(1, log_fp, "Cannot have more than %d servers\n", 
@@ -329,7 +330,7 @@ init_server_data()
         error_return(1, log_fp, "Cannot allocate prereg snapshot\n");
     }
 
-    pthread_spin_init(&data.spinlock, PTHREAD_PROCESS_PRIVATE);
+    //pthread_spin_init(&data.spinlock, PTHREAD_PROCESS_PRIVATE);
     
     data.endpoints = RB_ROOT;
     
@@ -947,13 +948,11 @@ polling()
     through the CTRL QP */
     check_failure_count();
 
-    if (IS_LEADER) {
-        /* Try to commit new log entries */
-        commit_new_entries();
+    /* Apply new committed entries */
+    if (!IS_LEADER) {
+        apply_committed_entries();
     }
 
-    /* Apply new committed entries */
-    //apply_committed_entries();
 
     if (IS_CANDIDATE) {
         /* Check the number of votes */
@@ -1760,7 +1759,7 @@ apply_committed_entries()
         
 apply_entry:        
         /* Apply entry */
-        if (CSM == entry->type) {
+        if (P_CONNECT == entry->type || P_SEND == entry->type || P_CLOSE == entry->type ) {
             if (!IS_LEADER) {
                 if (entry->idx % 10000 == 0) {
                     info_wtime(log_fp, "APPLY LOG ENTRY: (%"PRIu64"; %"PRIu64")\n", 
@@ -1771,7 +1770,7 @@ apply_entry:
             //else {
             //    if (SID_GET_TERM(data.ctrl_data->sid) < 50) sleep(1);
             //}
-
+            data.ucb(entry->data.cmd.len, &entry->data.cmd.cmd, entry->type);
             last_applied_entry.idx = entry->idx;
             last_applied_entry.term = entry->term;
             last_applied_entry.offset = data.log->apply;
@@ -2122,14 +2121,13 @@ int_handler(int dummy)
     dare_state |= TERMINATE;
 }
 
-int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf)
+int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id, uint64_t req_id)
 {
     sm_cmd_t *cmd = (sm_cmd_t*)malloc(sizeof(sm_cmd_t) + data_size);
     cmd->len = data_size;
     memcpy(cmd->cmd, buf, data_size);
-    pthread_spin_lock(&data.spinlock);
-    log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 10, 10, type, cmd);
-    pthread_spin_unlock(&data.spinlock);
+    log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), clt_id, req_id, type, cmd);
+    commit_new_entries();
 }
 
 #endif

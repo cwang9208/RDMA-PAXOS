@@ -3,6 +3,11 @@
 #define __STDC_FORMAT_MACROS
 #include "../include/dare/dare_server.h"
 
+static void do_action_to_server(size_t data_size,void* data,uint8_t type);
+static void do_action_connect(size_t data_size,void* data);
+static void do_action_send(size_t data_size,void* data);
+static void do_action_close(size_t data_size,void* data);
+
 FILE *log_fp;
 extern char* global_mgid;
 
@@ -18,6 +23,8 @@ int dare_main(node_id_t node_id, uint8_t group_size)
         .group_size = 3,
         .server_idx = 0xFF
     };
+    input.ucb = do_action_to_server;
+    //void(*user_cb)(size_t data_size,void* data,void* arg),
     static int srv_type = SRV_TYPE_START;
 
     // parser
@@ -59,9 +66,12 @@ void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 {
 	if (is_leader())
 	{
-		leader_conn_pair* conn_pair = NULL;
-		HASH_FIND_INT(proxy->leader_conn_map, &fd, conn_pair);
-		leader_handle_submit_req(CSM, bytes_read, buf);
+		pair_count* pair = NULL;
+		HASH_FIND_INT(proxy->hash_map, &fd, pair);
+		pair->req_id = ++pair->req_id;
+		pair_count* replaced_pair = NULL;
+		HASH_REPLACE_INT(proxy->hash_map, clt_id, pair, replaced_pair);
+		leader_handle_submit_req(P_SEND, bytes_read, buf, fd, pair->req_id);
 	}
 
 	return;
@@ -71,11 +81,13 @@ void proxy_on_accept(proxy_node* proxy, int fd)
 {
     if (is_leader())
     {
-        leader_conn_pair* new_conn = malloc(sizeof(leader_conn_pair));
-        memset(new_conn,0,sizeof(leader_conn_pair));
+        pair_count* pair = malloc(sizeof(pair_count));
+        memset(pair,0,sizeof(pair_count));
 
-        new_conn->key = fd;
-        HASH_ADD_INT(proxy->leader_conn_map, key, new_conn);
+        pair->clt_id = fd;
+        pair->req_id = 1;
+        HASH_ADD_INT(proxy->hash_map, clt_id, pair);
+        leader_handle_submit_req(P_CONNECT, 0, NULL, fd, pair->req_id);
     } else {
     }
 
@@ -86,15 +98,49 @@ void proxy_on_close(proxy_node* proxy, int fd)
 {
     if (is_leader())
     {
-        leader_conn_pair* conn_pair = NULL;
-        HASH_FIND_INT(proxy->leader_conn_map, &fd, conn_pair);
-        if (conn_pair == NULL)
-            goto mgr_on_close_exit;
-
-        HASH_DEL(proxy->leader_conn_map, conn_pair);
+        pair_count* pair = NULL;
+        HASH_FIND_INT(proxy->hash_map, &fd, pair);
+        pair->req_id = ++pair->req_id;
+        uint64_t req_id = pair->req_id;
+        pair_count* replaced_pair = NULL;
+        HASH_REPLACE_INT(proxy->hash_map, clt_id, pair, replaced_pair);
+        HASH_DEL(proxy->hash_map, pair);
+        leader_handle_submit_req(P_CLOSE, 0, NULL, fd, req_id);
     }
-mgr_on_close_exit:
     return;
+}
+
+static void do_action_to_server(size_t data_size,void* data,uint8_t type)
+{
+    switch(type){
+        case P_CONNECT:
+            do_action_connect(data_size,data);
+            break;
+        case P_SEND:
+            do_action_send(data_size,data);
+            break;
+        case P_CLOSE:
+            do_action_close(data_size,data);
+            break;
+        default:
+            break;
+    }
+    return;
+}
+
+static void do_action_connect(size_t data_size,void* data)
+{
+
+}
+
+static void do_action_send(size_t data_size,void* data)
+{
+
+}
+
+static void do_action_close(size_t data_size,void* data)
+{
+
 }
 
 proxy_node* proxy_init(node_id_t node_id,const char* config_path)
@@ -116,7 +162,7 @@ proxy_node* proxy_init(node_id_t node_id,const char* config_path)
 
 	proxy->db_ptr = initialize_db(proxy->db_name,0);
 
-	proxy->leader_conn_map = NULL;
+	proxy->hash_map = NULL;
 
     dare_main(node_id, proxy->group_size);
 

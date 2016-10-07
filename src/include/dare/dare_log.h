@@ -24,6 +24,10 @@
 #define CONFIG  2
 #define HEAD    3
 
+#define P_CONNECT 4
+#define P_SEND 5
+#define P_CLOSE 6
+
 extern int prev_log_entry_head;
 
 /* Entry types: <CSM, cmd> 
@@ -495,33 +499,32 @@ log_append_entry( dare_log_t* log,
         log->end = 0;
     }
     
+    if (type == P_CONNECT || type == P_SEND || type == P_CLOSE)
+    {
+        entry->data.cmd.len = cmd->len;
+        if (!log_fit_entry(log, log->end, entry)) {
+            /* Not enough place for an entry (with the command) */
+            log->end = 0;
+            entry = log_add_new_entry(log);
+            if (!entry) {
+                info_wtime(log_fp, "The LOG is full\n");
+                return 0;
+            }
+            entry->idx          = idx;
+            entry->term         = term;
+            entry->req_id       = req_id;
+            entry->clt_id       = clt_id;
+            entry->type         = type;
+            entry->data.cmd.len = cmd->len;
+        }
+        /* Copy the command */
+        if (cmd->len) {
+            memcpy(entry->data.cmd.cmd, cmd->cmd, entry->data.cmd.len);
+        }
+    }
+    
     /* Add data of the new entry */
     switch(type) {
-        case CSM:
-        {
-//info(log_fp, "### add log entry CSM\n");
-            entry->data.cmd.len = cmd->len;
-            if (!log_fit_entry(log, log->end, entry)) {
-                /* Not enough place for an entry (with the command) */
-                log->end = 0;
-                entry = log_add_new_entry(log);
-                if (!entry) {
-                    info_wtime(log_fp, "The LOG is full\n");
-                    return 0;
-                }
-                entry->idx          = idx;
-                entry->term         = term;
-                entry->req_id       = req_id;
-                entry->clt_id       = clt_id;
-                entry->type         = type;
-                entry->data.cmd.len = cmd->len;
-            }
-            /* Copy the command */
-            if (cmd->len) {
-                memcpy(entry->data.cmd.cmd, cmd->cmd, entry->data.cmd.len);
-            }
-            break;
-        }
         case CONFIG:
 //info(log_fp, "### add log entry CONFIG\n");
             entry->data.cid = *cid;

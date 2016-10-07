@@ -139,6 +139,8 @@ struct ctrl_data_t {
 };
 typedef struct ctrl_data_t ctrl_data_t;
 
+typedef void (*user_cb)(size_t data_size,void* data,uint8_t type);
+
 struct dare_server_input_t {
     FILE* log;
     char* name;
@@ -147,6 +149,8 @@ struct dare_server_input_t {
     uint8_t sm_type;
     uint8_t group_size;
     uint8_t server_idx;
+    
+    user_cb ucb;
 };
 typedef struct dare_server_input_t dare_server_input_t;
 
@@ -173,12 +177,13 @@ struct dare_server_data_t {
     struct rb_root endpoints;   // RB-tree with remote endpoints
     uint64_t last_write_csm_idx;
     uint64_t last_cmt_write_csm_idx;
-    pthread_spinlock_t spinlock;
+    //pthread_spinlock_t spinlock;
     
     struct ev_loop *loop;   // loop for EV library
 
     FILE* output_fp;
     dare_loggp_t loggp;
+    user_cb ucb;
     HRT_TIMESTAMP_T t1, t2;
 };
 typedef struct dare_server_data_t dare_server_data_t;
@@ -190,6 +195,6 @@ void dare_server_shutdown();
 void server_to_follower();
 int server_update_sid( uint64_t new_sid, uint64_t old_sid );
 int is_leader();
-int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf);
+int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id, uint64_t req_id);
 
 #endif /* DARE_SERVER_H */
