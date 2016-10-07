@@ -1,11 +1,12 @@
 #include "../include/proxy/proxy.h"
+#include "../include/config-comp/config-proxy.h"
 #define __STDC_FORMAT_MACROS
 #include "../include/dare/dare_server.h"
 
 FILE *log_fp;
 extern char* global_mgid;
 
-int dare_main()
+int dare_main(node_id_t node_id, uint8_t group_size)
 {
     int rc; 
     char *log_file="";
@@ -20,10 +21,8 @@ int dare_main()
     static int srv_type = SRV_TYPE_START;
 
     // parser
-    const char *group_size = getenv("group_size");
-    input.group_size = (uint8_t)atoi(group_size);
-    const char *server_idx = getenv("server_idx");
-    input.server_idx = (uint8_t)atoi(server_idx);
+    input.group_size = group_size;
+    input.server_idx = node_id;
     global_mgid = getenv("mgid");
     const char *server_type = getenv("server_type");
     if (strcmp(server_type, "join") == 0)
@@ -98,7 +97,7 @@ mgr_on_close_exit:
     return;
 }
 
-proxy_node* proxy_init()
+proxy_node* proxy_init(node_id_t node_id,const char* config_path)
 {
     proxy_node* proxy = (proxy_node*)malloc(sizeof(proxy_node));
 
@@ -108,13 +107,18 @@ proxy_node* proxy_init()
     }
 
     memset(proxy,0,sizeof(proxy_node));
+    
+    proxy->node_id = node_id;
+    if(proxy_read_config(proxy,config_path)){
+        err_log("PROXY : Configuration File Reading Error.\n");
+        goto proxy_exit_error;
+    }
 
-    proxy->db_name = "node_test";
 	proxy->db_ptr = initialize_db(proxy->db_name,0);
 
 	proxy->leader_conn_map = NULL;
 
-    dare_main();
+    dare_main(node_id, proxy->group_size);
 
     return proxy;
 

@@ -9,7 +9,7 @@ struct proxy_node_t;
 extern "C" {
 #endif
 
-	struct proxy_node_t* proxy_init();
+	struct proxy_node_t* proxy_init(uint8_t node_id, const char* config_path);
 	void proxy_on_read(struct proxy_node_t* proxy, void* buf, ssize_t ret, int fd);
 	void proxy_on_accept(struct proxy_node_t* proxy, int ret);
 	void proxy_on_close(struct proxy_node_t* proxy, int fildes);

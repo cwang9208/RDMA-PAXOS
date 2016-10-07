@@ -17,4 +17,5 @@ src/util \
 src \
 src/dare \
 src/db \
+src/config-comp \
 src/proxy \

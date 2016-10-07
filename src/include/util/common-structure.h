@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-typedef int64_t node_id_t;
+typedef uint8_t node_id_t;
 typedef uint32_t req_id_t;
 typedef uint32_t view_id_t;
 
@@ -25,8 +25,5 @@ view_id_t ltoview(uint64_t);
 uint64_t vstol(view_stamp* vs);
 view_stamp ltovs(uint64_t);
 int view_stamp_comp(view_stamp* op1,view_stamp* op2);
-
-int timeval_comp(struct timeval *op1,struct timeval *op2);
-void timeval_add(struct timeval*op1,struct timeval* op2,struct timeval* res);
 
 #endif 

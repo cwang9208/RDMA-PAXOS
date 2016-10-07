@@ -26,7 +26,11 @@ void tern_init_func(int argc, char **argv, char **env)
 		saved_init_func(argc, argv, env);
 
 	printf("tern_init_func is called\n");
-	proxy = proxy_init();
+
+	char *server_idx = getenv("server_idx");
+	uint8_t node_id = (uint8_t)atoi(server_idx);
+	char* config_path = getenv("config_path");
+	proxy = proxy_init(node_id, config_path);
 }
 
 typedef void (*fini_type)(void*);
