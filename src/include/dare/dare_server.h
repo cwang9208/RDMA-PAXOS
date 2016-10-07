@@ -139,7 +139,7 @@ struct ctrl_data_t {
 };
 typedef struct ctrl_data_t ctrl_data_t;
 
-typedef void (*user_cb)(size_t data_size,void* data,uint8_t type);
+typedef void (*user_cb)(int clt_id,uint8_t type,size_t data_size,void* data,void *arg);
 
 struct dare_server_input_t {
     FILE* log;
@@ -151,6 +151,7 @@ struct dare_server_input_t {
     uint8_t server_idx;
     
     user_cb ucb;
+    void* up_para;
 };
 typedef struct dare_server_input_t dare_server_input_t;
 
@@ -183,7 +184,10 @@ struct dare_server_data_t {
 
     FILE* output_fp;
     dare_loggp_t loggp;
+    
     user_cb ucb;
+    void* up_para;
+    
     HRT_TIMESTAMP_T t1, t2;
 };
 typedef struct dare_server_data_t dare_server_data_t;

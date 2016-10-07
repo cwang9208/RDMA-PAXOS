@@ -289,6 +289,7 @@ init_server_data()
     /* Set up the configuration */
     data.config.idx = data.input->server_idx;
     data.ucb = data.input->ucb;
+    data.up_para = data.input->up_para;
     data.config.len = MAX_SERVER_COUNT;
     if (data.config.len < data.input->group_size) {
         error_return(1, log_fp, "Cannot have more than %d servers\n", 
@@ -1770,7 +1771,7 @@ apply_entry:
             //else {
             //    if (SID_GET_TERM(data.ctrl_data->sid) < 50) sleep(1);
             //}
-            data.ucb(entry->data.cmd.len, &entry->data.cmd.cmd, entry->type);
+            data.ucb(entry->clt_id, entry->type, entry->data.cmd.len, &entry->data.cmd.cmd, data.up_para);
             last_applied_entry.idx = entry->idx;
             last_applied_entry.term = entry->term;
             last_applied_entry.offset = data.log->apply;

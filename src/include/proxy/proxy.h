@@ -9,11 +9,17 @@
 
 typedef uint8_t nid_t;
 
-typedef struct pair_count_t{
+typedef struct count_pair_t{
 	int clt_id;
 	uint64_t req_id;
+	UT_hash_handle hh;
+}count_pair;
+
+typedef struct socket_pair_t{
+	int clt_id;
+	int p_s;
     UT_hash_handle hh;
-}pair_count;
+}socket_pair;
 
 typedef struct proxy_address_t{
     struct sockaddr_in s_addr;
@@ -24,7 +30,8 @@ typedef struct proxy_node_t{
 	nid_t node_id; 
 	proxy_address sys_addr;
 	
-	pair_count* hash_map;
+	count_pair* leader_hash_map;
+	socket_pair* follower_hash_map;
 	
 	uint8_t group_size;
 	
