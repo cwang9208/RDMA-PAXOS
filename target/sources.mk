@@ -11,6 +11,12 @@ OBJS :=
 C_DEPS := 
 EXECUTABLES := 
 
+RBTREE_OBJS := 
+DARE_OBJS := 
+DARE := 
+RBTREE := 
+DARE_LIBPATH := 
+
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 src/util \

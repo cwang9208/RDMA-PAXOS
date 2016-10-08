@@ -2,28 +2,47 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-# Add inputs and outputs from these tool invocations to the build variables 
-C_SRCS += \
-../src/dare/dare_ibv.c \
-../src/dare/dare_ibv_ud.c \
-../src/dare/dare_ep_db.c \
-../src/dare/dare_ibv_rc.c \
-../src/dare/dare_server.c
+CC = gcc
 
-OBJS += \
-./src/dare/dare_ibv.o \
-./src/dare/dare_ibv_ud.o \
-./src/dare/dare_ep_db.o \
-./src/dare/dare_ibv_rc.o \
-./src/dare/dare_server.o \
+FLAGS        = -fPIC -rdynamic -std=gnu99 -DDEBUG=$(DEBUGOPT)-I"$(ROOT_DIR)/../src/include/dare" -I"$(ROOT_DIR)/../utils/rbtree/include" -I/usr/include
+CFLAGS       = #-Wall -Wunused-function #-Wextra
+LDFLAGS      = -L/usr/lib -libverbs
 
+PREFIX = $(ROOT_DIR)/src/dare
+DARE_LIBPATH = $(PREFIX)/lib
 
-# Each subdirectory must supply rules for building sources it contributes
-src/dare/%.o: ../src/dare/%.c
-	@echo 'Building file: $<'
-	@echo 'Invoking: GCC C Compiler'
-	gcc -fPIC -rdynamic -std=gnu99 -DDEBUG=$(DEBUGOPT) -O0 -g3 -c -o "$@" "$<"
-	@echo 'Finished building: $<'
-	@echo ' '
+DARE_HEADERS = $(shell echo $(ROOT_DIR)/../src/include/dare/*.h)
+DARE_SRCS = $(shell echo $(ROOT_DIR)/../src/dare/*.c)
+DARE_OBJS = $(DARE_SRCS:.c=.o)
+DARE = $(DARE_LIBPATH)/libdare.a
 
+RBTREE_HEADERS = $(shell echo $(ROOT_DIR)/../utils/rbtree/include/*.h)
+RBTREE_SRCS = $(shell echo $(ROOT_DIR)/../utils/rbtree/src/*.c)
+RBTREE_OBJS = $(RBTREE_SRCS:.c=.o)
+RBTREE = $(DARE_LIBPATH)/librbtree.a
 
+all: dare
+
+$(RBTREE): rbtree_print $(RBTREE_OBJS) $(RBTREE_HEADERS)
+	mkdir -pm 755 $(DARE_LIBPATH)
+	ar -rcs $@ $(RBTREE_OBJS)
+	@echo "##############################"
+	@echo
+rbtree_print:
+	@echo "##### BUILDING Red-Black Tree #####"
+	
+dare: FLAGS += -I/usr/local/include
+dare: LDFLAGS += /usr/local/lib/libev.a
+dare: $(DARE) 
+$(DARE): $(RBTREE) dare_print $(DARE_OBJS) $(DARE_HEADERS) 
+	mkdir -pm 755 $(DARE_LIBPATH)
+	ar -rcs $@ $(DARE_OBJS) $(RBTREE_OBJS)
+	@echo "##############################"
+	@echo
+dare_print:
+	@echo "##### BUILDING DARE #####"
+
+%.o: %.c $(HEADERS)
+	$(CC) $(FLAGS) $(CFLAGS) -c -o $@ $<
+	 
+.PHONY : all
