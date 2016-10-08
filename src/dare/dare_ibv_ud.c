@@ -402,7 +402,8 @@ ud_qp_create()
     /* Attach the QP to a multicast group */
     // saquery -g
     
-    uint8_t raw[16]; 
+    uint8_t raw[16];
+    global_mgid = getenv("mgid");
     if (!global_mgid) {
         error_return(1, log_fp, "mcast address is NULL\n");
     }
