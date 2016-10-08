@@ -5,17 +5,15 @@ Brief: A wait-free direct access protocol that uses RDMA features such as QP dis
 
 Build DARE
 ----------
-1. Prerequisites
-    - libev
-    - libconfig (sudo apt-get install libconfig-dev)
-    - libdb (sudo apt-get install libdb-dev)
-    - libibverbs
-2. make
+Prerequisites
+ - libev
+ - libconfig (sudo apt-get install libconfig-dev)
+ - libdb (sudo apt-get install libdb-dev)
+ - libibverbs
 
-Folder overview
----------------
-./src -- source files
-./utils 
-    - rbtree -- red-black Trees implementation (Linux)
-    - libev-4.15.tar.gz 
-
+0. Commands to checkout a brand-new project:
+ > git clone https://github.com/wangchenghku/RDMA-PAXOS.git
+ > cd $PAXOS_ROOT
+ 
+1. Set env vars in ~/.bashrc.
+ > export PAXOS_ROOT=<absolute path of RDMA-PAXOS>
