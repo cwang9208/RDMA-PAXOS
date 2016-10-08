@@ -2129,7 +2129,7 @@ int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt
     sm_cmd_t *cmd = (sm_cmd_t*)malloc(sizeof(sm_cmd_t) + data_size);
     cmd->len = data_size;
     memcpy(cmd->cmd, buf, data_size);
-    log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), clt_id, req_id, type, cmd);
+    log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, clt_id, type, cmd);
     commit_new_entries();
 }
 
