@@ -185,7 +185,7 @@ struct dare_server_data_t {
     FILE* output_fp;
     dare_loggp_t loggp;
     
-    user_cb ucb;
+    user_cb apply_cmd;
     void* up_para;
     
     HRT_TIMESTAMP_T t1, t2;
