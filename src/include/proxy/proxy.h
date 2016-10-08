@@ -4,10 +4,16 @@
 #include "../util/common-header.h"
 #include "../rsm-interface.h"
 #include "uthash.h"
+#include "utlist.h"
 
 #include "../db/db-interface.h"
 
 typedef uint8_t nid_t;
+
+typedef struct inner_thread {
+    pthread_t tid;
+    struct inner_thread *next;
+}inner_thread;
 
 typedef struct count_pair_t{
 	int clt_id;
@@ -32,6 +38,7 @@ typedef struct proxy_node_t{
 	
 	count_pair* leader_hash_map;
 	socket_pair* follower_hash_map;
+	inner_thread* inner_threads;
 	
 	uint8_t group_size;
 	

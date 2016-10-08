@@ -13,7 +13,7 @@ static int set_blocking(int fd, int blocking);
 
 FILE *log_fp;
 
-int dare_main(node_id_t node_id, uint8_t group_size, void* arg)
+int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
 {
     int rc; 
     char *log_file="";
@@ -26,7 +26,7 @@ int dare_main(node_id_t node_id, uint8_t group_size, void* arg)
     input->server_idx = 0xFF;
 
     input->ucb = do_action_to_server;
-    input->up_para = arg;
+    input->up_para = proxy;
     static int srv_type = SRV_TYPE_START;
 
     // parser
@@ -58,10 +58,30 @@ int dare_main(node_id_t node_id, uint8_t group_size, void* arg)
         fprintf(log_fp, "Cannot init dare_thread\n");
         return 1;
     }
+
+    inner_thread *elt = (inner_thread*)malloc(sizeof(inner_thread));
+    elt->tid = dare_thread;
+    LL_APPEND(proxy->inner_threads,elt);
     
     //fclose(log_fp);
     
     return 0;
+}
+
+static int tidcmp(inner_thread *a, inner_thread *b) {
+    return (a->tid == b->tid) ? 0 : 1;
+}
+
+static int is_internal(inner_thread* head, pthread_t tid)
+{
+	inner_thread *elt, etmp;
+	etmp.tid = tid;
+	LL_SEARCH(head,elt,&etmp,tidcmp);
+
+	if (elt)
+		return 1;
+	else
+		return 0;
 }
 
 static int set_blocking(int fd, int blocking) {
@@ -84,6 +104,9 @@ static int set_blocking(int fd, int blocking) {
 
 void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 {
+	if (is_internal(proxy->inner_threads, pthread_self()))
+		return;
+
 	if (is_leader())
 	{
 		count_pair* pair = NULL;
@@ -99,6 +122,9 @@ void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 
 void proxy_on_accept(proxy_node* proxy, int fd)
 {
+	if (is_internal(proxy->inner_threads, pthread_self()))
+		return;
+
     if (is_leader())
     {
     	count_pair* pair = malloc(sizeof(count_pair));
@@ -116,6 +142,9 @@ void proxy_on_accept(proxy_node* proxy, int fd)
 
 void proxy_on_close(proxy_node* proxy, int fd)
 {
+	if (is_internal(proxy->inner_threads, pthread_self()))
+		return;
+
     if (is_leader())
     {
     	count_pair* pair = NULL;
@@ -235,6 +264,7 @@ proxy_node* proxy_init(node_id_t node_id,const char* config_path)
 
 	proxy->leader_hash_map = NULL;
 	proxy->follower_hash_map = NULL;
+	proxy->inner_threads = NULL;
 
 	dare_main(node_id, proxy->group_size, proxy);
 
