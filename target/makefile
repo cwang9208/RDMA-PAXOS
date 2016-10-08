@@ -16,7 +16,7 @@ RM := rm -rf
 -include subdir.mk
 -include objects.mk
 
-LIBS += -ldare -lsupc++ -lpthread -lstdc++ -lrt -lm
+LIBS += -ldare -lev -ldb -lconfig -libverbs -lm
 
 # Add inputs and outputs from these tool invocations to the build variables 
 

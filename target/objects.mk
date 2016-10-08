@@ -1,1 +1,1 @@
-LIBS := -lev -ldb -lconfig -libverbs
+LIBS := -lsupc++ -lpthread -lstdc++ -lrt
