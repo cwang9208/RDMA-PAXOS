@@ -18,43 +18,43 @@ int dare_main(node_id_t node_id, uint8_t group_size, void* arg)
 {
     int rc; 
     char *log_file="";
-    dare_server_input_t input = {
-        .log = stdout,
-        .name = "",
-        .output = "dare_servers.out",
-        .srv_type = SRV_TYPE_START,
-        .group_size = 3,
-        .server_idx = 0xFF
-    };
-    input.ucb = do_action_to_server;
-    input.up_para = arg;
+    dare_server_input_t *input = (dare_server_input_t*)malloc(sizeof(dare_server_input_t));
+    input->log = stdout;
+    input->name = "";
+    input->output = "dare_servers.out";
+    input->srv_type = SRV_TYPE_START;
+    input->group_size = 3;
+    input->server_idx = 0xFF;
+
+    input->ucb = do_action_to_server;
+    input->up_para = arg;
     static int srv_type = SRV_TYPE_START;
 
     // parser
-    input.group_size = group_size;
-    input.server_idx = node_id;
+    input->group_size = group_size;
+    input->server_idx = node_id;
     global_mgid = getenv("mgid");
     const char *server_type = getenv("server_type");
     if (strcmp(server_type, "join") == 0)
     	srv_type = SRV_TYPE_JOIN;
     
-    input.srv_type = srv_type;
+    input->srv_type = srv_type;
 
     if (strcmp(log_file, "") != 0) {
-        input.log = fopen(log_file, "w+");
-        if (input.log==NULL) {
+        input->log = fopen(log_file, "w+");
+        if (input->log==NULL) {
             printf("Cannot open log file\n");
             exit(1);
         }
     }
-    if (SRV_TYPE_START == input.srv_type) {
-        if (0xFF == input.server_idx) {
+    if (SRV_TYPE_START == input->srv_type) {
+        if (0xFF == input->server_idx) {
             printf("A server cannot start without an index\n");
             exit(1);
         }
     }
     pthread_t dare_thread;
-    rc = pthread_create(&dare_thread, NULL, &dare_server_init, &input);
+    rc = pthread_create(&dare_thread, NULL, &dare_server_init, input);
     if (0 != rc) {
         fprintf(log_fp, "Cannot init dare_thread\n");
         return 1;
@@ -150,7 +150,7 @@ static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* d
 static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
 {
 	proxy_node* proxy = arg;
-	
+
 	socket_pair* ret;
 	HASH_FIND_INT(proxy->follower_hash_map, &clt_id, ret);
 	if (NULL == ret)
@@ -171,7 +171,7 @@ static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
 
 	if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
 		fprintf(stderr, "ERROR connecting!\n");
-	
+
 	set_blocking(ret->p_s, 0);
 
 	int enable = 1;

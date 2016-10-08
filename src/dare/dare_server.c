@@ -222,6 +222,8 @@ void *dare_server_init(void *arg)
         free_server_data();
         error_return(1, log_fp, "Cannot init server data\n");
     }
+
+    free(input);
         
     /* Init EV loop */
     data.loop = EV_DEFAULT;
