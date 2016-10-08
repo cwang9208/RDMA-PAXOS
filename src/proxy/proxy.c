@@ -12,7 +12,6 @@ static void do_action_close(int clt_id,size_t data_size,void* data,void* arg);
 static int set_blocking(int fd, int blocking);
 
 FILE *log_fp;
-extern char* global_mgid;
 
 int dare_main(node_id_t node_id, uint8_t group_size, void* arg)
 {
@@ -33,11 +32,6 @@ int dare_main(node_id_t node_id, uint8_t group_size, void* arg)
     // parser
     input->group_size = group_size;
     input->server_idx = node_id;
-    //global_mgid = getenv("mgid");
-    const char *mgid = getenv("mgid");
-    size_t mgid_len = strlen(mgid);
-    global_mgid = (char*)malloc(mgid_len);
-    memcpy(global_mgid, mgid, mgid_len);
 
     const char *server_type = getenv("server_type");
     if (strcmp(server_type, "join") == 0)
