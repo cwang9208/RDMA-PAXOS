@@ -38,6 +38,7 @@ clean:
 	-$(RM) $(DARE_OBJS)
 	-$(RM) $(DARE) $(RBTREE)
 	@echo "########################"
+	-@echo ' '
 	-$(RM) $(OBJS)$(C_DEPS) interpose.so
 	-@echo ' '
 
