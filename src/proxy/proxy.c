@@ -72,7 +72,7 @@ static int tidcmp(inner_thread *a, inner_thread *b) {
     return (a->tid == b->tid) ? 0 : 1;
 }
 
-static int is_internal(inner_thread* head, pthread_t tid)
+static int is_inner(inner_thread* head, pthread_t tid)
 {
 	inner_thread *elt, etmp;
 	etmp.tid = tid;
@@ -104,7 +104,7 @@ static int set_blocking(int fd, int blocking) {
 
 void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 {
-	if (is_internal(proxy->inner_threads, pthread_self()))
+	if (is_inner(proxy->inner_threads, pthread_self()))
 		return;
 
 	if (is_leader())
@@ -122,39 +122,38 @@ void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 
 void proxy_on_accept(proxy_node* proxy, int fd)
 {
-	if (is_internal(proxy->inner_threads, pthread_self()))
+	if (is_inner(proxy->inner_threads, pthread_self()))
 		return;
+	if (is_leader())
+	{
+		count_pair* pair = malloc(sizeof(count_pair));
+		memset(pair,0,sizeof(count_pair));
 
-    if (is_leader())
-    {
-    	count_pair* pair = malloc(sizeof(count_pair));
-    	memset(pair,0,sizeof(count_pair));
+		pair->clt_id = fd;
+		pair->req_id = 1;
+		HASH_ADD_INT(proxy->leader_hash_map, clt_id, pair);
+		leader_handle_submit_req(P_CONNECT, 0, NULL, fd, pair->req_id);
+	} else {
+	}
 
-    	pair->clt_id = fd;
-    	pair->req_id = 1;
-    	HASH_ADD_INT(proxy->leader_hash_map, clt_id, pair);
-    	leader_handle_submit_req(P_CONNECT, 0, NULL, fd, pair->req_id);
-    } else {
-    }
-
-    return;	
+	return;	
 }
 
 void proxy_on_close(proxy_node* proxy, int fd)
 {
-	if (is_internal(proxy->inner_threads, pthread_self()))
+	if (is_inner(proxy->inner_threads, pthread_self()))
 		return;
 
-    if (is_leader())
-    {
-    	count_pair* pair = NULL;
-    	HASH_FIND_INT(proxy->leader_hash_map, &fd, pair);
-    	pair->req_id = ++pair->req_id;
-    	uint64_t req_id = pair->req_id;
-    	HASH_DEL(proxy->leader_hash_map, pair);
-    	leader_handle_submit_req(P_CLOSE, 0, NULL, fd, req_id);
-    }
-    return;
+	if (is_leader())
+	{
+		count_pair* pair = NULL;
+		HASH_FIND_INT(proxy->leader_hash_map, &fd, pair);
+		pair->req_id = ++pair->req_id;
+		uint64_t req_id = pair->req_id;
+		HASH_DEL(proxy->leader_hash_map, pair);
+		leader_handle_submit_req(P_CLOSE, 0, NULL, fd, req_id);
+	}
+	return;
 }
 
 static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* data,void*arg)
