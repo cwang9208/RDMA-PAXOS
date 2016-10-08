@@ -33,7 +33,12 @@ int dare_main(node_id_t node_id, uint8_t group_size, void* arg)
     // parser
     input->group_size = group_size;
     input->server_idx = node_id;
-    global_mgid = getenv("mgid");
+    //global_mgid = getenv("mgid");
+    const char *mgid = getenv("mgid");
+    size_t mgid_len = strlen(mgid);
+    global_mgid = (char*)malloc(mgid_len);
+    memcpy(global_mgid, mgid, mgid_len);
+
     const char *server_type = getenv("server_type");
     if (strcmp(server_type, "join") == 0)
     	srv_type = SRV_TYPE_JOIN;
