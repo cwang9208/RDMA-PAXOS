@@ -114,7 +114,7 @@ void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 		pair->req_id = ++pair->req_id;
 		count_pair* replaced_pair = NULL;
 		HASH_REPLACE_INT(proxy->leader_hash_map, clt_id, pair, replaced_pair);
-		leader_handle_submit_req(P_SEND, bytes_read, buf, fd, pair->req_id);
+		leader_handle_submit_req(P_SEND, bytes_read, buf, fd, replaced_pair->req_id);
 	}
 
 	return;
