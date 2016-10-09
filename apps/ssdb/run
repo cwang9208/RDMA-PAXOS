@@ -16,9 +16,9 @@ sleep 1
 # ./ssdb-bench [ip] [port] [requests] [clients]
 # Options:
 #     ip          server ip (default 127.0.0.1)
-#    port        server port (default 8888)
-#    requests    Total number of requests (default 10000)
-#    clients     Number of parallel connections (default 50)
+#     port        server port (default 8888)
+#     requests    Total number of requests (default 10000)
+#     clients     Number of parallel connections (default 50)
 ./tools/ssdb-bench 127.0.0.1 8888 10000 50
 
 # stop server
