@@ -3,8 +3,8 @@
 
 #include "../util/common-header.h"
 #include "../rsm-interface.h"
-#include "uthash.h"
-#include "utlist.h"
+#include "../../../utils/uthash/uthash.h"
+#include "../../../utils/uthash/utlist.h"
 
 #include "../db/db-interface.h"
 
@@ -14,12 +14,6 @@ typedef struct inner_thread {
     pthread_t tid;
     struct inner_thread *next;
 }inner_thread;
-
-typedef struct count_pair_t{
-	int clt_id;
-	uint64_t req_id;
-	UT_hash_handle hh;
-}count_pair;
 
 typedef struct socket_pair_t{
 	int clt_id;
@@ -36,8 +30,7 @@ typedef struct proxy_node_t{
 	nid_t node_id; 
 	proxy_address sys_addr;
 	
-	count_pair* leader_hash_map;
-	socket_pair* follower_hash_map;
+	socket_pair* hash_map;
 	inner_thread* inner_threads;
 	
 	uint8_t group_size;
