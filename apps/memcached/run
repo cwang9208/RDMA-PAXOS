@@ -16,9 +16,9 @@ sleep 1
 # --concurrency=
 #        Number of users to simulate with load.
 # --execute-number=
-#		 Number of times to execute the given test.
+#        Number of times to execute the given test.
 # --servers=
-#		 List which servers you wish to connect to.
+#        List which servers you wish to connect to.
 cd ../benchmark
 bin/memslap -s 127.0.0.1:11222 --concurrency=10 --execute-number=5000
 
