@@ -16,7 +16,7 @@ RM := rm -rf
 -include subdir.mk
 -include objects.mk
 
-LIBS += -ldare -lev -ldb -lconfig -libverbs -lm
+LIBS += $(DARE) -lev -ldb -lconfig -libverbs -lm
 
 # Add inputs and outputs from these tool invocations to the build variables 
 
@@ -27,7 +27,7 @@ all: interpose.so
 interpose.so: $(OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -shared -Wl,-soname,interpose.so $(OBJS) -Wall -o interpose.so -L"$(DARE_LIBPATH)" $(LIBS)
+	gcc -shared -Wl,-soname,interpose.so $(OBJS) -Wall -o interpose.so $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -2131,6 +2131,7 @@ int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt
     memcpy(cmd->cmd, buf, data_size);
     log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, clt_id, type, cmd);
     commit_new_entries();
+    free(cmd);
 }
 
 #endif
