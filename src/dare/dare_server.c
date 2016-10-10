@@ -1690,7 +1690,14 @@ apply_committed_entries()
         /* Just the leader... */
         if ( (NOOP == entry->type) || (HEAD == entry->type) )
             goto apply_next_entry;
-        
+        if (P_CONNECT == entry->type || P_SEND == entry->type || P_CLOSE == entry->type) {
+            /* Client SM entry */
+            if (entry->req_id != 0) {
+                /* Send reply to the client */
+            }
+            goto apply_entry;
+        }
+
         /* CONFIG entry */
         if (CID_STABLE == entry->data.cid.state) {
             if (entry->req_id != 0) {
@@ -1771,7 +1778,7 @@ apply_committed_entries()
         
 apply_entry:        
         /* Apply entry */
-        if (P_CONNECT == entry->type || P_SEND == entry->type || P_CLOSE == entry->type ) {
+        if (P_CONNECT == entry->type || P_SEND == entry->type || P_CLOSE == entry->type) {
             if (!IS_LEADER) {
                 if (entry->idx % 10000 == 0) {
                     info_wtime(log_fp, "APPLY LOG ENTRY: (%"PRIu64"; %"PRIu64")\n", 
