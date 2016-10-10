@@ -22,5 +22,5 @@ cd ssdb-master
 CFLAGS="-g -O0" CXXFLAGS="-g -O0" make
 
 # config
-sed -i "s/ip: 127.0.0.1/ip: 0.0.0.0" ./ssdb.conf
-
+sed -i "s/ip: 127.0.0.1/#ip: 127.0.0.1" ./ssdb.conf
+sed -i "s/#ip: 0.0.0.0/ip: 0.0.0.0" ./ssdb.conf
