@@ -333,7 +333,10 @@ init_server_data()
         error_return(1, log_fp, "Cannot allocate prereg snapshot\n");
     }
 
-    pthread_spin_init(&data.spinlock, PTHREAD_PROCESS_PRIVATE);
+    rc = pthread_spin_init(&data.spinlock, PTHREAD_PROCESS_PRIVATE);
+    if (0!= rc) {
+        error_return(1, log_fp, "Cannot init The Lock\n");
+    }
     data.last_csm_idx = 0;
     data.last_cmt_csm_idx = 0;
     data.hash_map = NULL;

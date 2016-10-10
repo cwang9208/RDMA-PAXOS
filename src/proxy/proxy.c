@@ -16,7 +16,7 @@ FILE *log_fp;
 int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
 {
     int rc; 
-    char *log_file="";
+    char *dare_log_file="";
     dare_server_input_t *input = (dare_server_input_t*)malloc(sizeof(dare_server_input_t));
     input->log = stdout;
     input->name = "";
@@ -39,8 +39,8 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     
     input->srv_type = srv_type;
 
-    if (strcmp(log_file, "") != 0) {
-        input->log = fopen(log_file, "w+");
+    if (strcmp(dare_log_file, "") != 0) {
+        input->log = fopen(dare_log_file, "w+");
         if (input->log==NULL) {
             printf("Cannot open log file\n");
             exit(1);
@@ -137,14 +137,28 @@ void proxy_on_close(proxy_node* proxy, int fd)
 
 static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* data,void*arg)
 {
+	proxy_node* proxy = arg;
+	FILE* output = NULL;
+	if(proxy->req_log){
+		output = proxy->req_log_file;
+	}
     switch(type){
         case P_CONNECT:
+        	if(output!=NULL){
+        		fprintf(output,"Operation: Connects.\n");
+            }
             do_action_connect(clt_id,data_size,data,arg);
             break;
         case P_SEND:
+        	if(output!=NULL){
+        		fprintf(output,"Operation: Sends data.\n");
+            }
             do_action_send(clt_id,data_size,data,arg);
             break;
         case P_CLOSE:
+        	if(output!=NULL){
+        		fprintf(output,"Operation: Closes.\n");
+            }
             do_action_close(clt_id,data_size,data,arg);
             break;
         default:
@@ -221,7 +235,7 @@ do_action_close_exit:
 	return;
 }
 
-proxy_node* proxy_init(node_id_t node_id,const char* config_path)
+proxy_node* proxy_init(node_id_t node_id,const char* config_path,const char* proxy_log_path)
 {
     proxy_node* proxy = (proxy_node*)malloc(sizeof(proxy_node));
 
@@ -236,6 +250,35 @@ proxy_node* proxy_init(node_id_t node_id,const char* config_path)
     if(proxy_read_config(proxy,config_path)){
         err_log("PROXY : Configuration File Reading Error.\n");
         goto proxy_exit_error;
+    }
+
+    int build_log_ret = 0;
+    if(proxy_log_path==NULL){
+        proxy_log_path = ".";
+    }else{
+        if((build_log_ret=mkdir(proxy_log_path,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH))!=0){
+            if(errno!=EEXIST){
+                err_log("PROXY : Log Directory Creation Failed,No Log Will Be Recorded.\n");
+            }else{
+                build_log_ret = 0;
+            }
+        }
+    }
+
+    if(!build_log_ret){
+        //if(proxy->req_log){
+            char* req_log_path = (char*)malloc(sizeof(char)*strlen(proxy_log_path)+50);
+            memset(req_log_path,0,sizeof(char)*strlen(proxy_log_path)+50);
+            if(NULL!=req_log_path){
+                sprintf(req_log_path,"%s/node-%u-proxy-req.log",proxy_log_path,proxy->node_id);
+                //err_log("%s.\n",req_log_path);
+                proxy->req_log_file = fopen(req_log_path,"w");
+                free(req_log_path);
+            }
+            if(NULL==proxy->req_log_file && proxy->req_log){
+                err_log("PROXY : Client Request Log File Cannot Be Created.\n");
+            }
+        //}
     }
 
 	proxy->db_ptr = initialize_db(proxy->db_name,0);

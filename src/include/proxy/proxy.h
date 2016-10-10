@@ -33,8 +33,11 @@ typedef struct proxy_node_t{
 	socket_pair* hash_map;
 	inner_thread* inner_threads;
 	
+    // log option
+    int req_log;
+
 	uint8_t group_size;
-	
+	FILE* req_log_file;
 	char* db_name;
 	db* db_ptr;
 }proxy_node;

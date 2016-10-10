@@ -30,7 +30,9 @@ void tern_init_func(int argc, char **argv, char **env)
 	char *server_idx = getenv("server_idx");
 	uint8_t node_id = (uint8_t)atoi(server_idx);
 	char* config_path = getenv("config_path");
-	proxy = proxy_init(node_id, config_path);
+
+	char* proxy_log_dir = NULL;
+	proxy = proxy_init(node_id, config_path, proxy_log_dir);
 }
 
 typedef void (*fini_type)(void*);

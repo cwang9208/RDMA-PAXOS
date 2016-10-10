@@ -41,6 +41,10 @@ int proxy_read_config(struct proxy_node_t* cur_node,const char* config_path){
         goto goto_config_error;
     }
 
+// read the option for log, if it has some sections
+    
+    config_setting_lookup_int(pro_ele,"req_log",&cur_node->req_log);
+
     const char* db_name;
     if(!config_setting_lookup_string(pro_ele,"db_name",&db_name)){
         goto goto_config_error;
