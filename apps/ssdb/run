@@ -9,7 +9,7 @@ APP_DIR=$PAXOS_ROOT/apps/ssdb
 #     -d    run as daemon
 #     -s    option to start|stop|restart the server
 cd $APP_DIR/ssdb-master
-./ssdb-server -d ssdb.conf
+./ssdb-server ssdb.conf
 sleep 1
 
 # benchmark
