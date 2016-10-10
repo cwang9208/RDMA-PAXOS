@@ -121,6 +121,27 @@ extern "C" int accept(int socket, struct sockaddr *address, socklen_t *address_l
 	return ret;
 }
 
+// memcached
+extern "C" int accept4(int sockfd, struct sockaddr *addr, socklen_t *addrlen, int flags)
+{
+	typedef int (*orig_accept4_type)(int, sockaddr *, socklen_t *, int);
+	static orig_accept4_type orig_accept4;
+	if (!orig_accept4)
+		orig_accept4 = (orig_accept4_type) dlsym(RTLD_NEXT, "accept4");
+
+	int ret = orig_accept4(sockfd, addr, addrlen, flags);
+
+	if (ret >= 0 && proxy != NULL)
+	{
+		struct stat sb;
+		fstat(ret, &sb);
+		if ((sb.st_mode & S_IFMT) == S_IFSOCK)
+			proxy_on_accept(proxy, ret);
+	}
+
+	return ret;
+}
+
 extern "C" int close(int fildes)
 {
 	if (proxy != NULL)

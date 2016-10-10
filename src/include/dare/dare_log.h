@@ -225,7 +225,7 @@ log_add_new_entry( dare_log_t* log )
 static inline uint32_t 
 log_entry_len( dare_log_entry_t* entry )
 {
-    if (entry->type != CSM)
+    if (entry->type == NOOP || entry->type == CONFIG || entry->type == HEAD)
         return (uint32_t)sizeof(dare_log_entry_t);
     return (uint32_t)(sizeof(dare_log_entry_t) + entry->data.cmd.len);
 }
