@@ -36,6 +36,7 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     const char *server_type = getenv("server_type");
     if (strcmp(server_type, "join") == 0)
     	srv_type = SRV_TYPE_JOIN;
+    dare_log_file = getenv("dare_log_file");
     
     input->srv_type = srv_type;
 
