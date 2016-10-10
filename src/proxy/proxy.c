@@ -213,7 +213,7 @@ static void do_action_send(int clt_id,size_t data_size,void* data,void* arg)
 	}else{
 		int n = write(ret->p_s, data, data_size);
 		if (n < 0)
-			fprintf(stderr, "ERROR writing to socket");
+			fprintf(stderr, "ERROR writing to socket!\n");
 	}
 do_action_send_exit:
 	return;
@@ -228,7 +228,7 @@ static void do_action_close(int clt_id,size_t data_size,void* data,void* arg)
 		goto do_action_close_exit;
 	}else{
 		if (close(ret->p_s))
-			fprintf(stderr, "ERROR closing socket\n");
+			fprintf(stderr, "ERROR closing socket!\n");
 		HASH_DEL(proxy->hash_map, ret);
 	}
 do_action_close_exit:
