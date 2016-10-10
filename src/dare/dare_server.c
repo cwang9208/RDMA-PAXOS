@@ -269,7 +269,7 @@ void dare_server_shutdown()
     dare_ib_srv_shutdown();
     free_server_data();
     fclose(log_fp);
-    exit(1);
+    pthread_exit(NULL);
 }
 
 static int
