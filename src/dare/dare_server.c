@@ -571,12 +571,152 @@ next:
     info_wtime(log_fp, "Latest vote successfully retrieved\n");
     //memset(data.ctrl_data->sm_rep, 0, MAX_SERVER_COUNT * sizeof(sm_rep_t));
     /* Go to next recovery step */
+    ev_set_cb(w, send_sm_request_cb);
+    w->repeat = NOW;
+    ev_timer_again(EV_A_ w);
     return;
 
 shutdown:
     w->repeat = 0;
     ev_timer_again(EV_A_ w);
     dare_server_shutdown();
+}
+
+/**
+ * Send SM request to other servers
+ * Note: the timer is stopped when receiving a SM reply
+ */
+static void
+send_sm_request_cb( EV_P_ ev_timer *w, int revents )
+{
+    int rc;
+    
+    text(log_fp, "\n>> RECOVER SM <<\n");
+    rc = dare_ib_send_sm_request();
+    if (0 != rc) {
+        error(log_fp, "Cannot recover the SM\n");
+        goto shutdown;
+    }
+    
+    /* Retransmit after retransmission period */
+    w->repeat = retransmit_period;
+    ev_timer_again(EV_A_ w);
+    return;
+    
+shutdown:
+    w->repeat = 0;
+    ev_timer_again(EV_A_ w);
+    dare_server_shutdown();
+}
+
+/**
+ * Poll for a SM request
+ */
+static void
+poll_sm_requests()
+{
+    int rc;
+    uint8_t i, size = get_group_size(data.config);
+    snapshot_t *snapshot;
+    int reg_mem = 0;
+    for (i = 0; i < size; i++) {
+        if (i == data.config.idx)
+            continue;
+        if (!data.ctrl_data->sm_req[i])
+            continue;
+
+        info_wtime(log_fp, "SM request from p%"PRIu8"\n", i);
+        
+        /* Found SM request */
+        data.ctrl_data->sm_req[i] = 0;
+        if (!(dare_state & SNAPSHOT)) {
+            /* There is no snapshot */
+            info(log_fp, "   # no snapshot\n");
+            uint32_t len = data.sm->get_sm_size(data.sm);
+            info(log_fp, "   # snapshot len = %"PRIu32"\n", len);
+            if (len <= PREREG_SNAPSHOT_SIZE) {
+                info(log_fp, "   # pre-register snapshot\n");
+                snapshot = data.prereg_snapshot;
+            }
+            else {
+                snapshot = data.snapshot;
+                if (snapshot != NULL) {
+                    /* For some reason the snapshot is already allocated */
+                    free(snapshot);
+                }
+                rc = posix_memalign((void**)&snapshot, sizeof(uint64_t), 
+                            sizeof(snapshot_t) + len);
+                if (0!= rc) {
+                    error(log_fp, "Cannot allocate snapshot\n");
+                    dare_server_shutdown();
+                }
+                reg_mem = 1;
+            }
+            snapshot->len = len;
+            snapshot->last_entry = last_applied_entry;
+            data.sm->create_snapshot(data.sm, snapshot->data);
+            /* Avoid updating the snapshot before the head offset is modified */
+            dare_state |= SNAPSHOT;
+        }
+        /* Send a SM reply with the address of the snapshot */
+        rc = dare_ib_send_sm_reply(i, snapshot, reg_mem);
+        if (rc != 0) {
+            error(log_fp, "Cannot send SM reply\n");
+            dare_server_shutdown();
+        }
+    }
+}
+
+/**
+ * Poll for a SM reply
+ */
+static void 
+poll_sm_reply()
+{
+    int rc;
+    uint8_t target, size = get_group_size(data.config);
+    sm_rep_t *reply;
+    for (target = 0; target < size; target++) {
+        if (target == data.config.idx) continue;
+        reply = &data.ctrl_data->sm_rep[target];
+        if ( (reply->sid > data.ctrl_data->sid) && (reply->raddr) && 
+            (reply->rkey) && (reply->len) )
+        {
+            /* Found SM reply */
+            data.ctrl_data->sid = reply->sid;
+            break;
+        }
+    }
+    if (target == size) return;
+    info_wtime(log_fp, "SM reply from p%"PRIu8"\n", target);
+    
+    /* Update cache SID */
+    info_wtime(log_fp, "SID OBTAINED DURING SM RECOVERY: "
+            "[%020"PRIu64"|%d|%03"PRIu8"]\n", 
+            SID_GET_TERM(data.ctrl_data->sid),
+            (SID_GET_L(data.ctrl_data->sid) ? 1 : 0),
+            SID_GET_IDX(data.ctrl_data->sid));
+    
+    /* Recover SM */
+    rc = dare_ib_recover_sm(target);
+    if (rc > 1) {
+        error(log_fp, "Cannot recover SM\n");
+        dare_server_shutdown();
+    }
+    if (rc != 0) {
+        /* Insuccess - try again later */  
+        return;
+    }
+    
+    /* Reset all replies */
+    memset(data.ctrl_data->sm_rep, 0, MAX_SERVER_COUNT * sizeof(sm_rep_t));
+    
+    /* SM recovered successfully; go to next recovery step */
+    info_wtime(log_fp, "SM recovered successfully\n");
+    dare_state |= SM_RECOVERED;
+    ev_set_cb(&timer_event, recover_log_cb);
+    timer_event.repeat = NOW;
+    ev_timer_again(data.loop, &timer_event);
 }
 
 /**
@@ -895,6 +1035,13 @@ polling()
     /* Poll UD connection for incoming messages */
     poll_ud();
 
+    if ( (dare_state & RC_ESTABLISHED) && 
+        !(dare_state & SM_RECOVERED) ) 
+    {
+        /* Poll for a SM reply */
+        poll_sm_reply();
+    }
+
     /* Stop here if not recovered yet */
     if (!(dare_state & LOG_RECOVERED))
         return;
@@ -952,6 +1099,11 @@ polling()
         }
     }
 #endif
+
+    /* Poll for SM requests */
+    if (!IS_LEADER) {
+        poll_sm_requests();
+    }
     
     /* Check the number of failed attempts to access a server 
     through the CTRL QP */

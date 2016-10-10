@@ -593,6 +593,124 @@ int rc_send_sm_reply( uint8_t target, void *s, int reg_mem )
 }
 
 /**
+ * Server recovery: Get the SM of a random picked server referred to 
+ * as the target. For this, the target must dump it's SM in a contiguous 
+ * buffer that is accessible through RDMA. The SM contains the offset of 
+ * the last applied entry; thus, lcl.apply = SM.apply
+ * 
+ * !!! Note: to avoid connecting the LOG QPs, we use the CTRL QP
+ */
+int rc_recover_sm( uint8_t target )
+{
+    int rc;
+    rem_mem_t rm;
+    uint8_t i, size = get_group_size(SRV_DATA->config);
+    int posted_sends[MAX_SERVER_COUNT];
+    TIMER_INIT;
+       
+    /* Set local memory where to store the SM snapshot */
+    snapshot_t *snapshot;
+    struct ibv_mr *lcl_mr;
+    if (SRV_DATA->ctrl_data->sm_rep[target].len <= PREREG_SNAPSHOT_SIZE) {
+        info(log_fp, "   # pre-register snapshot\n");
+        snapshot = SRV_DATA->prereg_snapshot;
+        lcl_mr = IBDEV->prereg_snapshot_mr;
+    }
+    else {
+        /* Allocate memory for the snapshot */
+        snapshot = SRV_DATA->snapshot;
+        if (snapshot != NULL) {
+            /* For some reason the snapshot is already allocated */
+            free(snapshot);
+        }
+        rc = posix_memalign((void**)&snapshot, sizeof(uint64_t), 
+            sizeof(snapshot_t) + SRV_DATA->ctrl_data->sm_rep[target].len);
+        if (0 != rc) {
+            error_return(1, log_fp, "Cannot allocate snapshot\n");
+        }
+        /* Register memory for the snapshot */
+        if (NULL != IBDEV->snapshot_mr) {
+            /* For some reason the snapshot_mr is already registered */
+            rc = ibv_dereg_mr(IBDEV->snapshot_mr);
+            if (0 != rc) {
+                error(log_fp, "Cannot deregister memory");
+            }
+        }
+        IBDEV->snapshot_mr = ibv_reg_mr(IBDEV->rc_pd, snapshot, 
+            sizeof(snapshot_t) + SRV_DATA->ctrl_data->sm_rep[target].len, 
+            IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_ATOMIC | 
+            IBV_ACCESS_REMOTE_READ | IBV_ACCESS_LOCAL_WRITE);
+        if (NULL == IBDEV->snapshot_mr) {
+            error_return(1, log_fp, "Cannot register memory");
+        }
+        lcl_mr = IBDEV->snapshot_mr;
+    }
+    
+    /* Post send op only for the target */
+    for (i = 0; i < size; i++) {
+        posted_sends[i] = -1;
+    }
+    ssn++;  // increase ssn to avoid past work completions
+    TIMER_START(log_fp, "Recover SM (%"PRIu64")\n", ssn); 
+    text(log_fp, "   (p%"PRIu8")\n", target);    
+    
+    info(log_fp, "   # recover snapshot from p%"PRIu8"\n", target);    
+    
+    rm.raddr = SRV_DATA->ctrl_data->sm_rep[target].raddr;
+    rm.rkey = SRV_DATA->ctrl_data->sm_rep[target].rkey;
+    posted_sends[target] = 1;
+    /* server_id, qp_id, buf, len, mr, opcode, signaled, rm, posted_sends */ 
+    rc = post_send(target, CTRL_QP, snapshot,
+                    SRV_DATA->ctrl_data->sm_rep[target].len, 
+                    lcl_mr, IBV_WR_RDMA_READ, SIGNALED, rm, posted_sends);
+    if (0 != rc) {
+        /* This should never happen */
+        error_return(RC_ERROR, log_fp, "Cannot post send operation\n");
+    }
+    TIMER_STOP(log_fp);
+    info(log_fp, "   # waiting for snapshot\n");
+    
+    rc = wait_for_one(posted_sends, CTRL_QP);
+    if (RC_ERROR == rc) {
+        /* This should never happen */
+        error_return(1, log_fp, "Cannot get log entries\n");
+    }
+    if (RC_SUCCESS != rc) {
+        /* Operation failed; try again later */
+        return -1;
+    }
+    info(log_fp, "   # snapshot recovered; apply it\n");
+    
+    /* Successfully recovered the snapshot - apply it */
+    rc = SRV_DATA->sm->apply_snapshot(SRV_DATA->sm, snapshot->data, 
+                snapshot->len);
+    if (0 != rc) {
+        error_return(1, log_fp, "Cannot apply SM snapshot\n");
+    }
+    SRV_DATA->log->apply = snapshot->last_entry.offset;
+    
+    info(log_fp, "   # snapshot applied; apply = %"PRIu64"\n", SRV_DATA->log->apply);
+    
+    /* Free allocated memory if needed */
+    if (SRV_DATA->ctrl_data->sm_rep[target].len > PREREG_SNAPSHOT_SIZE) {
+        if (NULL != IBDEV->snapshot_mr) {
+            rc = ibv_dereg_mr(IBDEV->snapshot_mr);
+            if (0 != rc) {
+                error(log_fp, "Cannot deregister memory");
+            }
+            IBDEV->snapshot_mr = NULL;
+        }
+        if (NULL != SRV_DATA->snapshot) {
+            free(SRV_DATA->snapshot);
+            SRV_DATA->snapshot = NULL;
+        }
+    }
+    info(log_fp, "   # snapshot recovered\n");
+    
+    return 0;
+}
+
+/**
  * Server recovery:
  *  - Get the commit and the end offsets from a server; 
  * lcl.head <= any rmt.apply <= any rmt.commit; 

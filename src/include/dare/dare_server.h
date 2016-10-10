@@ -180,6 +180,7 @@ struct dare_server_data_t {
     
     ctrl_data_t *ctrl_data;  // control data (state & private data)
     dare_log_t  *log;       // local log (remotely accessible)
+    dare_sm_t   *sm;        // local state machine
     snapshot_t  *prereg_snapshot;
     snapshot_t  *snapshot;
     
