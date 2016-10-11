@@ -43,7 +43,7 @@ StartDare() {
 StopDare() {
     for i in "${!pids[@]}"
     do
-        cmd=( "ssh" "$USER@$i" "kill -s SIGINT" "${pids[$i]}" )
+        cmd=( "ssh" "$USER@$i" "kill -2" "${pids[$i]}" )
         echo "Executing: ${cmd[@]}"
         $("${cmd[@]}")
     done
