@@ -45,7 +45,7 @@ StartDare() {
         cmd=( "ssh" "$USER@${servers[$i]}" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
         pids[$srv]=$("${cmd[@]}")
         rounds[$srv]=2
-        #echo "COMMAND: "${cmd[@]}
+        #echo "StartDare COMMAND: "${cmd[@]}
         echo -e "\tp$i ($srv) -- pid=${pids[$srv]}"
     done
     #echo -e "\n\tinitial servers: ${!servers[]}${!pids[@]}"
@@ -54,7 +54,7 @@ StartDare() {
 
 StopDare() {
     for srv in "${!pids[@]}"; do
-        cmd=( "ssh" "$USER@$srv" "kill -s SIGINT" "${pids[$srv]}" )
+        cmd=( "ssh" "$USER@$srv" "kill -2" "${pids[$srv]}" )
         echo "Executing: ${cmd[@]}"
         $("${cmd[@]}")
     done
@@ -106,7 +106,7 @@ RemoveLeader() {
     #echo -e "\n\tservers after removing the leader p${leader_idx} ($leader): ${!pids[@]}"
     #echo -e "\t...and their PIDs: ${pids[@]}"
     #echo ${cmd[@]}
-    maj=$(bc -l <<< "${group_size}/2.")
+    maj=$(bc -l <<< "${group_size}/2.") # bc - An arbitrary precision calculator language
     if [[ ${#pids[@]} < $maj ]]; then
         ErrorAndExit "...not enough servers!"
     fi
@@ -171,19 +171,19 @@ fi
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
 nodes=(10.22.1.1 10.22.1.2 10.22.1.3 10.22.1.4 10.22.1.5 10.22.1.6 10.22.1.7 10.22.1.8 10.22.1.9)
 node_count=${#nodes[@]}
-if [ $node_count -lt 8 ]; then
-    ErrorAndExit "At least 8 nodes are required."
-fi
+
 echo "Allocated ${node_count} nodes:" > nodes
 for ((i=0; i<${node_count}; ++i)); do
     echo "$i:${nodes[$i]}" >> nodes
 done
 group_size=9
 
-for ((i=1; i<$node_count; ++i)); do
-    servers[$((i-1))]=${nodes[$i]}
+for ((i=0; i<$node_count; ++i)); do
+    servers[${i}]=${nodes[$i]}
 done
-echo ">>> $(($node_count-1)) servers: ${servers[@]}"
+echo ">>> $(($node_count)) servers: ${servers[@]}"
+
+DGID="ff0e::ffff:e101:101"
 
 rm -f *.log
 
@@ -246,7 +246,11 @@ FailServer() {
 
 Start
 
+sleep 8
+
 FailLeader
+
+sleep 6
 
 FailServer 
 
