@@ -99,7 +99,7 @@ RemoveLeader() {
         echo -e "\n\tNo PID for the leader $leader"
         return 1
     fi
-    cmd=( "ssh" "$USER@$leader" "kill -s SIGINT" "${pids[$leader]}" )
+    cmd=( "ssh" "$USER@$leader" "kill -2" "${pids[$leader]}" )
     $("${cmd[@]}")
     unset pids[$leader]
     echo -e "\tremoved p${leader_idx} ($leader)"
@@ -124,7 +124,7 @@ RemoveServer() {
         if [[ "x${pids[$srv]}" == "x" ]]; then
             continue
         fi
-        cmd=( "ssh" "$USER@$srv" "kill -s SIGINT" "${pids[$srv]}" )
+        cmd=( "ssh" "$USER@$srv" "kill -2" "${pids[$srv]}" )
         #echo -e "\tcmd: ${cmd[@]}"
         $("${cmd[@]}")
         unset pids[$srv]
