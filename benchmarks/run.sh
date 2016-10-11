@@ -57,7 +57,7 @@ FindLeader() {
     for ((i=0; i<${server_count}; ++i)); do
         srv=${servers[$i]}
         # look for the latest [T<term>] LEADER 
-        cmd=( "ssh" "$USER@$srv" \'grep -r \"] LEADER\" $PWD/srv${i}.log\' )
+        cmd=( "ssh" "$USER@$srv" "grep -r \"] LEADER\"" "$PWD/srv${i}.log" )
         #echo ${cmd[@]}
         grep_out=$("${cmd[@]}")
         if [[ -z $grep_out ]]; then
