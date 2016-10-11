@@ -84,9 +84,8 @@ StartBenchmark() {
 		run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-h $leader" )
     fi
 	
-	cmd=( "ssh" "$USER@${client}" )
+	cmd=( "ssh" "$USER@${client}" "${run_loop[@]}" ">" "benchmark_out.txt")
 	$("${cmd[@]}")
-	echo "Benchmark COMMDAND: ${cmd[@]}"
 }
 
 DAREDIR=$PWD/..
@@ -151,6 +150,7 @@ StartDare $server_count
 echo "done"
 
 sleep 8
+#note: wait for leader election
 
 StartBenchmark
 
