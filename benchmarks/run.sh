@@ -31,7 +31,7 @@ Sync() {
 StartDare() {
     for ((i=0; i<$1; ++i));
     do
-        config_dare=( "server_type=start" "server_idx=$i" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}_1.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so" )
+        config_dare=( "server_type=start" "server_idx=$i" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so" )
         cmd=( "ssh" "$USER@${servers[$i]}" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
         pids[${servers[$i]}]=$("${cmd[@]}")
         echo "StartDare COMMAND: "${cmd[@]}
@@ -54,10 +54,10 @@ FindLeader() {
     max_idx=-1
     max_term=""
  
-    for ((i=0; i<${group_size}; ++i)); do
+    for ((i=0; i<${server_count}; ++i)); do
         srv=${servers[$i]}
         # look for the latest [T<term>] LEADER 
-        cmd=( "ssh" "$USER@$srv" "grep -r \"] LEADER\"" "$PWD/srv${i}_$((rounds[$srv]-1)).log" )
+        cmd=( "ssh" "$USER@$srv" "grep -r \"] LEADER\"" "$PWD/srv${i}.log" )
         #echo ${cmd[@]}
         grep_out=$("${cmd[@]}")
         if [[ -z $grep_out ]]; then
@@ -79,9 +79,10 @@ FindLeader() {
 StartBenchmark() {
 	FindLeader
 	if [[ "$APP" == "ssdb" ]]; then
-		run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" "6379" "100" "4")
+		run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" )
 	elif [[ "$APP" == "redis" ]]; then
-		run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-h $leader" "-n 100" "-c 4" "-t set,get" )
+		run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-h $leader" )
+    fi
 	
 	cmd=( "ssh" "$USER@${client}" )
 	$("${cmd[@]}")
@@ -115,6 +116,8 @@ elif [[ "$APP" == "ssdb" ]]; then
     run_dare="${DAREDIR}/apps/ssdb/ssdb-master/ssdb-server ${DAREDIR}/apps/ssdb/ssdb-master/ssdb.conf"
 elif [[ "$APP" == "redis" ]]; then
     run_dare="${DAREDIR}/apps/redis/install/bin/redis-server"
+elif [[ "$APP" == "memcached" ]]; then
+    run_dare="${DAREDIR}/apps/memcached/install/bin/memcached"
 fi
 
 
@@ -130,7 +133,7 @@ if [ $server_count -le 0 ]; then
     ErrorAndExit "0 < #servers; --scount"
 fi
 
-client=${nodes[$i]}
+client=${nodes[0]}
 echo ">>> client: ${client}"
 
 for ((i=0; i<${server_count}; ++i)); do
@@ -146,6 +149,8 @@ Sync $server_count
 echo -ne "Starting $server_count servers...\n"
 StartDare $server_count
 echo "done"
+
+sleep 2
 
 StartBenchmark
 
