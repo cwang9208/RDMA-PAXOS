@@ -149,7 +149,7 @@ echo -ne "Starting $server_count servers...\n"
 StartDare $server_count
 echo "done"
 
-sleep 8
+sleep 10
 #note: wait for leader election
 
 StartBenchmark
