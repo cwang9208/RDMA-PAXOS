@@ -38,7 +38,8 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     char *dare_log_file = getenv("dare_log_file");
     if (dare_log_file == NULL) {
 	 dare_log_file = "";
-    
+    }
+
     input->srv_type = srv_type;
 
     if (strcmp(dare_log_file, "") != 0) {
