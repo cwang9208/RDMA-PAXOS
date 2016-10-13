@@ -16,7 +16,6 @@ FILE *log_fp;
 int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
 {
     int rc; 
-    char *dare_log_file="";
     dare_server_input_t *input = (dare_server_input_t*)malloc(sizeof(dare_server_input_t));
     input->log = stdout;
     input->name = "";
@@ -36,7 +35,9 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     const char *server_type = getenv("server_type");
     if (strcmp(server_type, "join") == 0)
     	srv_type = SRV_TYPE_JOIN;
-    dare_log_file = getenv("dare_log_file");
+    char *dare_log_file = getenv("dare_log_file");
+    if (dare_log_file == NULL) {
+	 dare_log_file = "";
     
     input->srv_type = srv_type;
 
