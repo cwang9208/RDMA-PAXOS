@@ -224,16 +224,16 @@ static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
 		}
 		ret->p_s = sockfd;
 		HASH_ADD_INT(proxy->hash_map, clt_id, ret);
+
+        if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
+            fprintf(stderr, "ERROR connecting!\n");
+
+        set_blocking(ret->p_s, 0);
+
+        int enable = 1;
+        if(setsockopt(ret->p_s, IPPROTO_TCP, TCP_NODELAY, (void*)&enable, sizeof(enable)) < 0)
+            fprintf(stderr, "TCP_NODELAY SETTING ERROR!\n");
 	}
-
-	if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
-		fprintf(stderr, "ERROR connecting!\n");
-
-	set_blocking(ret->p_s, 0);
-
-	int enable = 1;
-	if(setsockopt(ret->p_s, IPPROTO_TCP, TCP_NODELAY, (void*)&enable, sizeof(enable)) < 0)
-		fprintf(stderr, "TCP_NODELAY SETTING ERROR!\n");
 
 do_action_connect_exit:
 	return;
