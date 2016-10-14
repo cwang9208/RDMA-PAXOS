@@ -212,6 +212,6 @@ void dare_server_shutdown();
 void server_to_follower();
 int server_update_sid( uint64_t new_sid, uint64_t old_sid );
 int is_leader();
-int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id);
+void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id);
 
 #endif /* DARE_SERVER_H */

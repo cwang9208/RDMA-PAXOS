@@ -1944,6 +1944,7 @@ apply_entry:
             //else {
             //    if (SID_GET_TERM(data.ctrl_data->sid) < 50) sleep(1);
             //}
+            //store_cmd()
             data.last_cmt_csm_idx++;
             if (!IS_LEADER) {
             	data.last_csm_idx = data.last_cmt_csm_idx;
@@ -2300,15 +2301,16 @@ int_handler(int dummy)
     dare_state |= TERMINATE;
 }
 
-int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id)
+void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id)
 {
     sm_cmd_t *cmd = (sm_cmd_t*)malloc(sizeof(sm_cmd_t) + data_size);
     cmd->len = data_size;
     memcpy(cmd->cmd, buf, data_size);
-    
-    pthread_spin_lock(&data.spinlock);
+
     count_pair_t* pair = NULL;
     uint64_t req_id;
+    
+    pthread_spin_lock(&data.spinlock);
     switch(type) {
         case P_CONNECT:
             pair = (count_pair_t*)malloc(sizeof(count_pair_t));
@@ -2333,14 +2335,16 @@ int leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt
             break;
     }
     log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, clt_id, type, cmd);
-    uint64_t csm_idx = ++data.last_csm_idx;
-    pthread_spin_unlock(&data.spinlock);
 
 poll_committed_entries:
-    if (csm_idx < data.last_cmt_csm_idx)
-        goto poll_committed_entries;
+    if (not_committed_entries(data.log))
+    	goto poll_committed_entries;
+    
+    pthread_spin_unlock(&data.spinlock);
     
     free(cmd);
+
+    return;
 }
 
 #endif
