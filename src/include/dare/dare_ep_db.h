@@ -38,6 +38,7 @@ void ep_erase( struct rb_root *root, const uint16_t lid );
 void ep_db_print( struct rb_root *root );
 void ep_db_free( struct rb_root *root );
 void ep_dp_reset_wait_idx( struct rb_root *root );
+void ep_dp_reply_read_req( struct rb_root *root, uint64_t idx );
 
 
 #endif /* DARE_EP_DB_H */

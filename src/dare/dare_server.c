@@ -283,15 +283,19 @@ init_server_data()
         switch(data.input->sm_type) {
             case SM_NULL:
                 break;
+            case SM_KVS:
+                data.sm = create_kvs_sm(0);
+                break;
             case SM_FS:
                 break;
         }
     }
+    data.sm->proxy_store_cmd = data.input->store_cmd;
+    data.sm->proxy_do_action = data.input->do_action;
+    data.sm->up_para = data.input->up_para;
 
     /* Set up the configuration */
     data.config.idx = data.input->server_idx;
-    data.apply_cmd = data.input->ucb;
-    data.up_para = data.input->up_para;
     data.config.len = MAX_SERVER_COUNT;
     if (data.config.len < data.input->group_size) {
         error_return(1, log_fp, "Cannot have more than %d servers\n", 
@@ -337,8 +341,6 @@ init_server_data()
     if (0!= rc) {
         error_return(1, log_fp, "Cannot init The Lock\n");
     }
-    data.last_csm_idx = 0;
-    data.last_cmt_csm_idx = 0;
     data.hash_map = NULL;
 
     data.endpoints = RB_ROOT;
@@ -1944,12 +1946,9 @@ apply_entry:
             //else {
             //    if (SID_GET_TERM(data.ctrl_data->sid) < 50) sleep(1);
             //}
-            //store_cmd()
-            data.last_cmt_csm_idx++;
-            if (!IS_LEADER) {
-            	data.last_csm_idx = data.last_cmt_csm_idx;
-                data.apply_cmd(entry->clt_id, entry->type, entry->data.cmd.len, &entry->data.cmd.cmd, data.up_para);
-            }
+            data.sm->proxy_store_cmd(entry->clt_id, entry->type, entry->data.cmd.len, &entry->data.cmd.cmd, data.sm->up_para);
+            if (!IS_LEADER)
+                data.sm->proxy_do_action(entry->clt_id, entry->type, entry->data.cmd.len, &entry->data.cmd.cmd, data.sm->up_para);
                 
             last_applied_entry.idx = entry->idx;
             last_applied_entry.term = entry->term;
@@ -1962,7 +1961,12 @@ apply_next_entry:
         /* Advance apply offset */
         data.log->apply += log_entry_len(entry);
     }
-    
+
+    /* When new entries are applied, the leader verifies if there are 
+    pending read requests */
+    if ((old_apply != data.log->apply) && IS_LEADER) {
+        ep_dp_reply_read_req(&data.endpoints, data.last_cmt_write_csm_idx);
+    }    
 }
 
 static void
@@ -2334,10 +2338,10 @@ void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int cl
             HASH_DEL(data.hash_map, pair);
             break;
     }
-    log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, clt_id, type, cmd);
+    uint64_t wait_for_idx = log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, clt_id, type, cmd);
 
 poll_committed_entries:
-    if (not_committed_entries(data.log))
+    if (wait_for_idx > data.last_cmt_write_csm_idx)
     	goto poll_committed_entries;
     
     pthread_spin_unlock(&data.spinlock);

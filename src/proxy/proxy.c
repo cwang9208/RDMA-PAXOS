@@ -5,6 +5,7 @@
 #define __STDC_FORMAT_MACROS
 #include "../include/dare/dare_server.h"
 
+static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,void* data,void*arg);
 static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* data,void *arg);
 static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg);
 static void do_action_send(int clt_id,size_t data_size,void* data,void* arg);
@@ -24,7 +25,8 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     input->group_size = 3;
     input->server_idx = 0xFF;
 
-    input->ucb = do_action_to_server;
+    input->do_action = do_action_to_server;
+    input->store_cmd = stablestorage_save_request;
     input->up_para = proxy;
     static int srv_type = SRV_TYPE_START;
 
@@ -36,9 +38,8 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     if (strcmp(server_type, "join") == 0)
     	srv_type = SRV_TYPE_JOIN;
     char *dare_log_file = getenv("dare_log_file");
-    if (dare_log_file == NULL) {
-	 dare_log_file = "";
-    }
+    if (dare_log_file == NULL)
+        dare_log_file = "";
 
     input->srv_type = srv_type;
 
@@ -136,6 +137,39 @@ void proxy_on_close(proxy_node* proxy, int fd)
 		leader_handle_submit_req(P_CLOSE, 0, NULL, fd);
 
 	return;
+}
+
+static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,void* data,void*arg)
+{
+    proxy_node* proxy = arg;
+    switch(type){
+        case P_CONNECT:
+        {
+            proxy_connect_msg* co_msg = (proxy_connect_msg*)malloc(PROXY_CONNECT_MSG_SIZE);
+            co_msg->header.action = P_CONNECT;
+            co_msg->header.clt_id = clt_id;
+            store_record(proxy->db_ptr,PROXY_CONNECT_MSG_SIZE,co_msg);
+            break;
+        }
+        case P_SEND:
+        {
+            proxy_send_msg* send_msg = (proxy_send_msg*)malloc(sizeof(proxy_send_msg)+data_size);
+            send_msg->header.action = P_SEND;
+            send_msg->header.clt_id = clt_id;
+            send_msg->data_size = data_size;
+            memcpy(send_msg->data,data,data_size);
+            store_record(proxy->db_ptr,PROXY_SEND_MSG_SIZE(send_msg),send_msg);
+            break;
+        }
+        case P_CLOSE:
+        {
+            proxy_close_msg* cl_msg = malloc(PROXY_CLOSE_MSG_SIZE);
+            cl_msg->header.action = P_CLOSE;
+            cl_msg->header.clt_id = clt_id;
+            store_record(proxy->db_ptr,PROXY_CLOSE_MSG_SIZE,cl_msg);
+            break;
+        }
+    }
 }
 
 static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* data,void*arg)

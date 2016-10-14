@@ -129,6 +129,37 @@ void ep_dp_reset_wait_idx( struct rb_root *root )
     }
 }
 
+void ep_dp_reply_read_req( struct rb_root *root, uint64_t idx )
+{
+    int rc;
+    struct rb_node *node;
+    dare_ep_t *ep;
+    int verify_leadership = 0;
+    int leader = 0;
+    
+    for (node = rb_first(root); node; node = rb_next(node)) 
+    {
+        ep = rb_entry(node, dare_ep_t, node);
+        if (!ep->wait_for_idx) continue;
+        if (!verify_leadership) {
+            /* Verify leadership */
+            rc = rc_verify_leadership(&leader);
+            if (0 != rc) {
+                error(log_fp, "Cannot verify leadership\n");
+            }
+            if (0 == leader) {
+                /* No longer the leader; reset the wait idx */
+                ep_dp_reset_wait_idx(root);
+                return;
+            }
+            verify_leadership = 1;
+        }
+        if (ep->wait_for_idx < idx) {
+            ud_clt_answer_read_request(ep);
+        }
+    }
+}
+
 /* ================================================================== */
 
 static void 

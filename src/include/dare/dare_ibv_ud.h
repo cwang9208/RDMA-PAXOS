@@ -16,6 +16,7 @@
 #define DARE_IBV_UD_H
 
 #include <infiniband/verbs.h> /* OFED stuff */ 
+#include "./dare_sm.h"
 #include "./dare_ibv.h"
 #include "./dare_config.h"
 #include "./dare_ep_db.h"
@@ -31,6 +32,18 @@ struct ud_hdr_t {
     //uint8_t pad[7];
 };
 typedef struct ud_hdr_t ud_hdr_t;
+
+struct client_req_t {
+    ud_hdr_t hdr;
+    sm_cmd_t cmd;
+};
+typedef struct client_req_t client_req_t;
+
+struct client_rep_t {
+    ud_hdr_t hdr;
+    sm_data_t data;
+};
+typedef struct client_rep_t client_rep_t;
 
 struct reconf_req_t {
     ud_hdr_t hdr;
@@ -85,5 +98,6 @@ int ud_establish_rc();
 
 /* Client stuff */
 int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type );
+void ud_clt_answer_read_request(dare_ep_t *ep);
 
 #endif /* DARE_IBV_UD_H */

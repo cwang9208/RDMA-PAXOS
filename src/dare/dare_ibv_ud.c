@@ -26,6 +26,7 @@
 #include "../include/dare/dare_ibv.h"
 #include "../include/dare/dare_ep_db.h"
 #include "../include/dare/dare_server.h"
+#include "../include/dare/dare_client.h"
 #include "../include/dare/timer.h"
 extern FILE *log_fp;
 
@@ -1396,6 +1397,33 @@ handle_rc_ack(struct ibv_wc *wc, rc_ack_t *msg)
 /* ================================================================== */
 /* Client messages */
 #if 1
+
+void ud_clt_answer_read_request(dare_ep_t *ep)
+{
+    int rc;
+    ep->wait_for_idx = 0;
+    client_req_t *request = (client_req_t*)ep->last_read_request;
+    
+    /* Create reply */
+    client_rep_t *reply = (client_rep_t*)IBDEV->ud_send_buf;
+    memset(reply, 0, sizeof(client_rep_t));
+    reply->hdr.id = request->hdr.id;
+    reply->hdr.type = CSM_REPLY;
+    
+    /* Get data from SM */
+    rc = SRV_DATA->sm->apply_cmd(SRV_DATA->sm, &request->cmd, &reply->data);
+    if (0 != rc) {
+        error(log_fp, "Cannot apply read operation to the state machine\n");
+    }
+    
+    /* Send reply */
+    uint32_t len = sizeof(client_rep_t) + reply->data.len;
+    rc = ud_send_message(&ep->ud_ep, len);
+    if (0 != rc) {
+        error(log_fp, "Cannot send message over UD to %"PRIu16"\n", 
+                     ep->ud_ep.lid);
+    }
+}
 
 int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 {

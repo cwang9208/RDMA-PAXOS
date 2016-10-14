@@ -42,4 +42,33 @@ typedef struct proxy_node_t{
 	db* db_ptr;
 }proxy_node;
 
+typedef enum proxy_action_t{
+    P_CONNECT=4,
+    P_SEND=5,
+    P_CLOSE=6,
+}proxy_action;
+
+typedef struct proxy_msg_header_t{
+    proxy_action action;
+    int clt_id;
+}proxy_msg_header;
+#define PROXY_MSG_HEADER_SIZE (sizeof(proxy_msg_header))
+
+typedef struct proxy_connect_msg_t{
+    proxy_msg_header header;
+}proxy_connect_msg;
+#define PROXY_CONNECT_MSG_SIZE (sizeof(proxy_connect_msg))
+
+typedef struct proxy_send_msg_t{
+    proxy_msg_header header;
+    size_t data_size;
+    char data[0];
+}proxy_send_msg;
+#define PROXY_SEND_MSG_SIZE(M) (M->data_size+sizeof(proxy_send_msg))
+
+typedef struct proxy_close_msg_t{
+    proxy_msg_header header;
+}proxy_close_msg;
+#define PROXY_CLOSE_MSG_SIZE (sizeof(proxy_close_msg))
+
 #endif
