@@ -22,6 +22,7 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     input->name = "";
     input->output = "dare_servers.out";
     input->srv_type = SRV_TYPE_START;
+    input->sm_type = CLT_KVS;
     input->group_size = 3;
     input->server_idx = 0xFF;
 
@@ -212,18 +213,18 @@ static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
 	HASH_FIND_INT(proxy->hash_map, &clt_id, ret);
 	if (NULL == ret)
 	{
-		ret = malloc(sizeof(socket_pair));
-		memset(ret,0,sizeof(socket_pair));
+        ret = malloc(sizeof(socket_pair));
+        memset(ret,0,sizeof(socket_pair));
 
-		ret->clt_id = clt_id;
-		int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-		if (sockfd < 0)
-		{
-			fprintf(stderr, "ERROR opening socket!\n");
-			goto do_action_connect_exit;
-		}
-		ret->p_s = sockfd;
-		HASH_ADD_INT(proxy->hash_map, clt_id, ret);
+        ret->clt_id = clt_id;
+        int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd < 0)
+        {
+            fprintf(stderr, "ERROR opening socket!\n");
+            goto do_action_connect_exit;
+        }
+        ret->p_s = sockfd;
+        HASH_ADD_INT(proxy->hash_map, clt_id, ret);
 
         if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
             fprintf(stderr, "ERROR connecting!\n");
@@ -233,7 +234,7 @@ static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
         int enable = 1;
         if(setsockopt(ret->p_s, IPPROTO_TCP, TCP_NODELAY, (void*)&enable, sizeof(enable)) < 0)
             fprintf(stderr, "TCP_NODELAY SETTING ERROR!\n");
-	}
+    }
 
 do_action_connect_exit:
 	return;
