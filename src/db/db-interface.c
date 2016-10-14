@@ -33,7 +33,7 @@ db* initialize_db(const char* db_name,uint32_t flag){
         goto db_init_return;
     }
 
-    if((ret = b_db->open(b_db,NULL,db_name,NULL,DB_RECNO,DB_THREAD|DB_CREATE,0))!=0){
+    if((ret = b_db->open(b_db,NULL,db_name,NULL,DB_RECNO,DB_CREATE,0))!=0){
         //b_db->err(b_db,ret,"%s","test.db");
         goto db_init_return;
     }

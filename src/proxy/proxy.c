@@ -175,11 +175,11 @@ static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,
 
 static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* data,void*arg)
 {
-	proxy_node* proxy = arg;
-	FILE* output = NULL;
-	if(proxy->req_log){
-		output = proxy->req_log_file;
-	}
+    proxy_node* proxy = arg;
+    FILE* output = NULL;
+    if(proxy->req_log){
+        output = proxy->req_log_file;
+    }
     switch(type){
         case P_CONNECT:
         	if(output!=NULL){
@@ -207,12 +207,12 @@ static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* d
 
 static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
 {
-	proxy_node* proxy = arg;
+    proxy_node* proxy = arg;
 
-	socket_pair* ret;
-	HASH_FIND_INT(proxy->hash_map, &clt_id, ret);
-	if (NULL == ret)
-	{
+    socket_pair* ret;
+    HASH_FIND_INT(proxy->hash_map, &clt_id, ret);
+    if (NULL == ret)
+    {
         ret = malloc(sizeof(socket_pair));
         memset(ret,0,sizeof(socket_pair));
 
