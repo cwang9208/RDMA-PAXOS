@@ -29,32 +29,23 @@ Sync() {
 }
 
 StartDare() {
-    loop=0
-    for ((i=0; i<${server_count}; ++i));
+    for ((i=0; i<$1; ++i));
     do
-        if [[ $loop -eq $node_count ]]; then
-            loop=0
-        fi
         config_dare=( "server_type=start" "server_idx=$i" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so" )
-        cmd=( "ssh" "$USER@${servers[$loop]}" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
-        pids[${loop}]=$("${cmd[@]}")
+        cmd=( "ssh" "$USER@${servers[$i]}" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
+        pids[${servers[$i]}]=$("${cmd[@]}")
         echo "StartDare COMMAND: "${cmd[@]}
-        loop=$(($loop + 1))
     done
-    #echo -e "\n\tinitial servers: ${!pids[@]}"
-    #echo -e "\t...and their PIDs: ${pids[@]}"
+    echo -e "\n\tinitial servers: ${!pids[@]}"
+    echo -e "\t...and their PIDs: ${pids[@]}"
 }
 
 StopDare() {
-    loop=0
-    for (( i = 0; i <${server_count}; i++ )); do
-        if [[ $loop -eq $node_count ]]; then
-            loop=0
-        fi
-        cmd=( "ssh" "$USER@${servers[$loop]}" "kill -2" "${pids[$i]}" )
+    for i in "${!pids[@]}"
+    do
+        cmd=( "ssh" "$USER@$i" "kill -2" "${pids[$i]}" )
         echo "Executing: ${cmd[@]}"
         $("${cmd[@]}")
-        loop=$(($loop + 1))
     done
 }
 
@@ -62,13 +53,9 @@ FindLeader() {
     leader=""
     max_idx=-1
     max_term=""
-
-    loop=0
+ 
     for ((i=0; i<${server_count}; ++i)); do
-        if [[ $loop -eq $node_count ]]; then
-            loop=0
-        fi
-        srv=${servers[$loop]}
+        srv=${servers[$i]}
         # look for the latest [T<term>] LEADER 
         cmd=( "ssh" "$USER@$srv" "grep -r \"] LEADER\"" "$PWD/srv${i}.log" )
         #echo ${cmd[@]}
@@ -82,21 +69,22 @@ FindLeader() {
            if [[ $term -gt $max_term ]]; then 
                 max_term=$term
                 leader=$srv
+                leader_idx=$i
            fi
         done
-        loop=$(($loop + 1))
     done
+    #echo "Leader: p${leader_idx} ($leader)"
 }
 
 StartBenchmark() {
     FindLeader
     if [[ "$APP" == "ssdb" ]]; then
-        run_client=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" )
+        run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" )
     elif [[ "$APP" == "redis" ]]; then
-        run_client=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-h $leader" )
+        run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-h $leader" )
     fi
     
-    cmd=( "ssh" "$USER@${client}" "${run_client[@]}" ">" "benchmark_out.txt")
+    cmd=( "ssh" "$USER@${client}" "${run_loop[@]}" ">" "benchmark_out.txt")
     $("${cmd[@]}")
 }
 
@@ -156,9 +144,9 @@ DGID="ff0e::ffff:e101:101"
 
 ########################################################################
 
-Sync $node_count
+Sync $server_count
 echo -ne "Starting $server_count servers...\n"
-StartDare
+StartDare $server_count
 echo "done"
 
 sleep 10
