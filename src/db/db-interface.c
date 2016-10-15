@@ -33,7 +33,7 @@ db* initialize_db(const char* db_name,uint32_t flag){
         goto db_init_return;
     }
 
-    if((ret = b_db->open(b_db,NULL,db_name,NULL,DB_RECNO,DB_CREATE,0))!=0){
+    if((ret = b_db->open(b_db,NULL,db_name,NULL,DB_RECNO,DB_THREAD|DB_CREATE,0))!=0){
         //b_db->err(b_db,ret,"%s","test.db");
         goto db_init_return;
     }
@@ -72,14 +72,18 @@ int store_record(db* db_p,size_t data_size,void* data){
     }
     DB* b_db = db_p->bdb_ptr;
     DBT key,db_data;
-    memset(&key,0,sizeof(key));
     memset(&db_data,0,sizeof(db_data));
     db_data.data = data;
     db_data.size = data_size;
+
+    memset(&key,0,sizeof(key));
+    db_recno_t recno;
+    key.data = &recno;
+    key.ulen = sizeof(recno);
+    key.flags = DB_DBT_USERMEM;
     if ((ret=b_db->put(b_db,NULL,&key,&db_data,DB_AUTO_COMMIT|DB_APPEND))==0){
         //debug_log("db : %ld record stored. \n",*(uint64_t*)key_data);
         //b_db->sync(b_db,0);
-        db_recno_t recno = *(db_recno_t *)key.data;
         debug_log("new record number is %lu\n", (u_long)recno);
     }
     else{
