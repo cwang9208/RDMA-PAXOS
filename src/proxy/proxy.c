@@ -108,10 +108,10 @@ static int set_blocking(int fd, int blocking) {
     return 0;
 }
 
-static hk_t gen_key(nid_t node_id,nc_t node_count,sec_t time){
-    hk_t key = (hk_t)time;
-    key |= ((hk_t)node_id<<13);
-    key |= ((hk_t)node_count<<9);
+static hk_t gen_key(nid_t node_id,nc_t node_count){
+    hk_t key = 0;
+    key |= ((hk_t)node_id<<8);
+    key |= (hk_t)node_count;
     return key;
 }
 
@@ -129,21 +129,18 @@ void process_data(proxy_node* proxy, uint8_t type, ssize_t data_size, void* buf,
             pair = (socket_pair*)malloc(sizeof(socket_pair));
             memset(pair,0,sizeof(socket_pair));
             pair->clt_id = clt_id;
-            pair->req_id = 1;
-            struct timeval cur;
-            gettimeofday(&cur,NULL);
-            pair->connection_id = gen_key(proxy->node_id,proxy->pair_count++,cur.tv_sec);
+            pair->req_id = 0;
+            pair->connection_id = gen_key(proxy->node_id,proxy->pair_count++);
             
-            req_id = pair->req_id;
+            req_id = ++pair->req_id;
             connection_id = pair->connection_id;
             
             HASH_ADD_INT(proxy->leader_hash_map, clt_id, pair);
             break;
         case P_SEND:
             HASH_FIND_INT(proxy->leader_hash_map, &clt_id, pair);
-            pair->req_id = ++pair->req_id;
             
-            req_id = pair->req_id;
+            req_id = ++pair->req_id;
             connection_id = pair->connection_id;
             
             socket_pair* replaced_pair = NULL;
@@ -151,9 +148,8 @@ void process_data(proxy_node* proxy, uint8_t type, ssize_t data_size, void* buf,
             break;
         case P_CLOSE:
             HASH_FIND_INT(proxy->leader_hash_map, &clt_id, pair);
-            pair->req_id = ++pair->req_id;
             
-            req_id = pair->req_id;
+            req_id = ++pair->req_id;
             connection_id = pair->connection_id;
             
             HASH_DEL(proxy->leader_hash_map, pair);
