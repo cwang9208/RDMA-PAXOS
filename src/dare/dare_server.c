@@ -337,12 +337,6 @@ init_server_data()
         error_return(1, log_fp, "Cannot allocate prereg snapshot\n");
     }
 
-    rc = pthread_spin_init(&data.spinlock, PTHREAD_PROCESS_PRIVATE);
-    if (0!= rc) {
-        error_return(1, log_fp, "Cannot init The Lock\n");
-    }
-    data.hash_map = NULL;
-
     data.endpoints = RB_ROOT;
     
     return 0;
@@ -1847,7 +1841,7 @@ apply_committed_entries()
         /* Just the leader... */
         if ( (NOOP == entry->type) || (HEAD == entry->type) )
             goto apply_next_entry;
-        if (P_CONNECT == entry->type || P_SEND == entry->type || P_CLOSE == entry->type) {
+        if (CONFIG != entry->type && NOOP != entry->type && HEAD != entry->type) {
             /* Client SM entry */
             if (entry->req_id != 0) {
                 /* Send reply to the client */
@@ -1935,7 +1929,7 @@ apply_committed_entries()
         
 apply_entry:        
         /* Apply entry */
-        if (P_CONNECT == entry->type || P_SEND == entry->type || P_CLOSE == entry->type) {
+        if (CONFIG != entry->type && NOOP != entry->type && HEAD != entry->type) {
             if (!IS_LEADER) {
                 if (entry->idx % 10000 == 0) {
                     info_wtime(log_fp, "APPLY LOG ENTRY: (%"PRIu64"; %"PRIu64")\n", 
@@ -2305,50 +2299,26 @@ int_handler(int dummy)
     dare_state |= TERMINATE;
 }
 
-void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id)
+void leader_handle_submit_req( uint64_t req_id, uint16_t connection_id, uint8_t type, sm_cmd_t* cmd)
 {
-    sm_cmd_t *cmd = (sm_cmd_t*)malloc(sizeof(sm_cmd_t) + data_size);
-    cmd->len = data_size;
-    memcpy(cmd->cmd, buf, data_size);
 
-    count_pair_t* pair = NULL;
-    uint64_t req_id;
-    
-    pthread_spin_lock(&data.spinlock);
-    switch(type) {
-        case P_CONNECT:
-            pair = (count_pair_t*)malloc(sizeof(count_pair_t));
-            memset(pair,0,sizeof(count_pair_t));
-            pair->clt_id = clt_id;
-            pair->req_id = 1;
-            req_id = pair->req_id;
-            HASH_ADD_INT(data.hash_map, clt_id, pair);
-            break;
-        case P_SEND:
-            HASH_FIND_INT(data.hash_map, &clt_id, pair);
-            pair->req_id = ++pair->req_id;
-            req_id = pair->req_id;
-            count_pair_t* replaced_pair = NULL;
-            HASH_REPLACE_INT(data.hash_map, clt_id, pair, replaced_pair);
-            break;
-        case P_CLOSE:
-            HASH_FIND_INT(data.hash_map, &clt_id, pair);
-            pair->req_id = ++pair->req_id;
-            req_id = pair->req_id;
-            HASH_DEL(data.hash_map, pair);
-            break;
-    }
-    uint64_t wait_for_idx = log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, clt_id, type, cmd);
+    uint64_t wait_for_idx = log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, connection_id, type, cmd);
 
 poll_committed_entries:
     if (wait_for_idx > data.last_cmt_write_csm_idx)
     	goto poll_committed_entries;
     
-    pthread_spin_unlock(&data.spinlock);
-    
     free(cmd);
 
     return;
+}
+
+void *build_req_sub_msg(ssize_t data_size, void* buf)
+{
+    sm_cmd_t *cmd = (sm_cmd_t*)malloc(sizeof(sm_cmd_t) + data_size);
+    cmd->len = data_size;
+    memcpy(cmd->cmd, buf, data_size);
+    return cmd;
 }
 
 #endif

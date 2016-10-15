@@ -16,7 +16,6 @@
 
 #include <ev.h>
 #include "../../../utils/rbtree/include/rbtree.h"
-#include "../../../utils/uthash/uthash.h"
 #include "./dare_log.h"
 #include "./dare.h"
 #include "./timer.h"
@@ -155,13 +154,6 @@ struct dare_server_input_t {
 };
 typedef struct dare_server_input_t dare_server_input_t;
 
-struct count_pair_t{
-    int clt_id;
-    uint64_t req_id;
-    UT_hash_handle hh;
-};
-typedef struct count_pair_t count_pair_t;
-
 struct dare_loggp_t {
     double o[2],
         o_ninline,
@@ -187,9 +179,6 @@ struct dare_server_data_t {
     uint64_t last_write_csm_idx;
     uint64_t last_cmt_write_csm_idx;
     
-    pthread_spinlock_t spinlock;
-    count_pair_t *hash_map;
-    
     struct ev_loop *loop;   // loop for EV library
 
     FILE* output_fp;
@@ -206,6 +195,7 @@ void dare_server_shutdown();
 void server_to_follower();
 int server_update_sid( uint64_t new_sid, uint64_t old_sid );
 int is_leader();
-void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id);
+void *build_req_sub_msg(ssize_t data_size, void* buf);
+void leader_handle_submit_req( uint64_t req_id, uint16_t connection_id, uint8_t type, sm_cmd_t* cmd);
 
 #endif /* DARE_SERVER_H */

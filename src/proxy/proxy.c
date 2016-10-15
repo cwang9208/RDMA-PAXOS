@@ -5,12 +5,13 @@
 #define __STDC_FORMAT_MACROS
 #include "../include/dare/dare_server.h"
 
-static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,void* data,void*arg);
-static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* data,void *arg);
-static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg);
-static void do_action_send(int clt_id,size_t data_size,void* data,void* arg);
-static void do_action_close(int clt_id,size_t data_size,void* data,void* arg);
+static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg);
+static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
+static void do_action_connect(uint16_t clt_id,size_t data_size,void* data,void* arg);
+static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg);
+static void do_action_close(uint16_t clt_id,size_t data_size,void* data,void* arg);
 static int set_blocking(int fd, int blocking);
+static void process_data(proxy_node* proxy, uint8_t type, ssize_t data_size, void* buf, int clt_id);
 
 FILE *log_fp;
 
@@ -107,13 +108,68 @@ static int set_blocking(int fd, int blocking) {
     return 0;
 }
 
+static hk_t gen_key(nid_t node_id,nc_t node_count,sec_t time){
+    hk_t key = (hk_t)time;
+    key |= ((hk_t)node_id<<13);
+    key |= ((hk_t)node_count<<9);
+    return key;
+}
+
+void process_data(proxy_node* proxy, uint8_t type, ssize_t data_size, void* buf, int clt_id)
+{
+    void *cmd = build_req_sub_msg(data_size, buf);
+
+    socket_pair* pair = NULL;
+    uint64_t req_id;
+    uint16_t connection_id;
+    
+    pthread_spin_lock(&proxy->spinlock);
+    switch(type) {
+        case P_CONNECT:
+            pair = (socket_pair*)malloc(sizeof(socket_pair));
+            memset(pair,0,sizeof(socket_pair));
+            pair->clt_id = clt_id;
+            pair->req_id = 1;
+            struct timeval cur;
+            gettimeofday(&cur,NULL);
+            pair->connection_id = gen_key(proxy->node_id,proxy->pair_count++,cur.tv_sec);
+            
+            req_id = pair->req_id;
+            connection_id = pair->connection_id;
+            
+            HASH_ADD_INT(proxy->leader_hash_map, clt_id, pair);
+            break;
+        case P_SEND:
+            HASH_FIND_INT(proxy->leader_hash_map, &clt_id, pair);
+            pair->req_id = ++pair->req_id;
+            
+            req_id = pair->req_id;
+            connection_id = pair->connection_id;
+            
+            socket_pair* replaced_pair = NULL;
+            HASH_REPLACE_INT(proxy->leader_hash_map, clt_id, pair, replaced_pair);
+            break;
+        case P_CLOSE:
+            HASH_FIND_INT(proxy->leader_hash_map, &clt_id, pair);
+            pair->req_id = ++pair->req_id;
+            
+            req_id = pair->req_id;
+            connection_id = pair->connection_id;
+            
+            HASH_DEL(proxy->leader_hash_map, pair);
+            break;
+    }
+    leader_handle_submit_req(req_id, connection_id, type, cmd);
+    pthread_spin_unlock(&proxy->spinlock);
+}
+
 void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 {
 	if (is_inner(proxy->inner_threads, pthread_self()))
 		return;
 
 	if (is_leader())
-		leader_handle_submit_req(P_SEND, bytes_read, buf, fd);
+        process_data(proxy, P_SEND, bytes_read, buf, fd);
 
 	return;
 }
@@ -124,7 +180,7 @@ void proxy_on_accept(proxy_node* proxy, int fd)
 		return;
 
 	if (is_leader())
-		leader_handle_submit_req(P_CONNECT, 0, NULL, fd);
+        process_data(proxy, P_CONNECT, 0, NULL, fd);
 
 	return;	
 }
@@ -135,12 +191,12 @@ void proxy_on_close(proxy_node* proxy, int fd)
 		return;
 
 	if (is_leader())
-		leader_handle_submit_req(P_CLOSE, 0, NULL, fd);
+        process_data(proxy, P_CLOSE, 0, NULL, fd);
 
 	return;
 }
 
-static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,void* data,void*arg)
+static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg)
 {
     proxy_node* proxy = arg;
     switch(type){
@@ -148,7 +204,7 @@ static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,
         {
             proxy_connect_msg* co_msg = (proxy_connect_msg*)malloc(PROXY_CONNECT_MSG_SIZE);
             co_msg->header.action = P_CONNECT;
-            co_msg->header.clt_id = clt_id;
+            co_msg->header.connection_id = clt_id;
             store_record(proxy->db_ptr,PROXY_CONNECT_MSG_SIZE,co_msg);
             break;
         }
@@ -156,7 +212,7 @@ static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,
         {
             proxy_send_msg* send_msg = (proxy_send_msg*)malloc(sizeof(proxy_send_msg)+data_size);
             send_msg->header.action = P_SEND;
-            send_msg->header.clt_id = clt_id;
+            send_msg->header.connection_id = clt_id;
             send_msg->data_size = data_size;
             memcpy(send_msg->data,data,data_size);
             store_record(proxy->db_ptr,PROXY_SEND_MSG_SIZE(send_msg),send_msg);
@@ -166,14 +222,14 @@ static void stablestorage_save_request(int clt_id,uint8_t type,size_t data_size,
         {
             proxy_close_msg* cl_msg = malloc(PROXY_CLOSE_MSG_SIZE);
             cl_msg->header.action = P_CLOSE;
-            cl_msg->header.clt_id = clt_id;
+            cl_msg->header.connection_id = clt_id;
             store_record(proxy->db_ptr,PROXY_CLOSE_MSG_SIZE,cl_msg);
             break;
         }
     }
 }
 
-static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* data,void*arg)
+static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg)
 {
     proxy_node* proxy = arg;
     FILE* output = NULL;
@@ -205,18 +261,18 @@ static void do_action_to_server(int clt_id,uint8_t type,size_t data_size,void* d
     return;
 }
 
-static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
+static void do_action_connect(uint16_t clt_id,size_t data_size,void* data,void* arg)
 {
     proxy_node* proxy = arg;
 
     socket_pair* ret;
-    HASH_FIND_INT(proxy->hash_map, &clt_id, ret);
+    HASH_FIND(hh, proxy->follower_hash_map, &clt_id, sizeof(uint16_t), ret);
     if (NULL == ret)
     {
         ret = malloc(sizeof(socket_pair));
         memset(ret,0,sizeof(socket_pair));
 
-        ret->clt_id = clt_id;
+        ret->connection_id = clt_id;
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0)
         {
@@ -224,7 +280,7 @@ static void do_action_connect(int clt_id,size_t data_size,void* data,void* arg)
             goto do_action_connect_exit;
         }
         ret->p_s = sockfd;
-        HASH_ADD_INT(proxy->hash_map, clt_id, ret);
+        HASH_ADD(hh, proxy->follower_hash_map, connection_id, sizeof(uint16_t), ret);
 
         if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
             fprintf(stderr, "ERROR connecting!\n");
@@ -240,11 +296,11 @@ do_action_connect_exit:
 	return;
 }
 
-static void do_action_send(int clt_id,size_t data_size,void* data,void* arg)
+static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg)
 {
 	proxy_node* proxy = arg;
 	socket_pair* ret;
-	HASH_FIND_INT(proxy->hash_map, &clt_id, ret);
+	HASH_FIND(hh, proxy->follower_hash_map, &clt_id, sizeof(uint16_t), ret);
 
 	if(NULL==ret){
 		goto do_action_send_exit;
@@ -257,17 +313,17 @@ do_action_send_exit:
 	return;
 }
 
-static void do_action_close(int clt_id,size_t data_size,void* data,void* arg)
+static void do_action_close(uint16_t clt_id,size_t data_size,void* data,void* arg)
 {
 	proxy_node* proxy = arg;
 	socket_pair* ret;
-	HASH_FIND_INT(proxy->hash_map, &clt_id, ret);
+	HASH_FIND(hh, proxy->follower_hash_map, &clt_id, sizeof(uint16_t), ret);
 	if(NULL==ret){
 		goto do_action_close_exit;
 	}else{
 		if (close(ret->p_s))
 			fprintf(stderr, "ERROR closing socket!\n");
-		HASH_DEL(proxy->hash_map, ret);
+		HASH_DEL(proxy->follower_hash_map, ret);
 	}
 do_action_close_exit:
 	return;
@@ -321,8 +377,15 @@ proxy_node* proxy_init(node_id_t node_id,const char* config_path,const char* pro
 
 	proxy->db_ptr = initialize_db(proxy->db_name,0);
 
-	proxy->hash_map = NULL;
-	proxy->inner_threads = NULL;
+    if(pthread_spin_init(&proxy->spinlock, PTHREAD_PROCESS_PRIVATE)){
+        err_log("PROXY : Cannot Init The Lock.\n");
+        goto proxy_exit_error;
+    }
+
+	proxy->leader_hash_map = NULL;
+    proxy->follower_hash_map = NULL;
+	
+    proxy->inner_threads = NULL;
 
 	dare_main(node_id, proxy->group_size, proxy);
 

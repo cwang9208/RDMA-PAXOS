@@ -8,18 +8,25 @@
 
 #include "../db/db-interface.h"
 
+typedef uint16_t hk_t;
+typedef uint8_t nc_t;
+typedef uint64_t sec_t;
 typedef uint8_t nid_t;
+
+typedef struct socket_pair_t{
+    int clt_id;
+    uint64_t req_id;
+    
+    uint16_t connection_id;
+    int p_s;
+    
+    UT_hash_handle hh;
+}socket_pair;
 
 typedef struct inner_thread {
     pthread_t tid;
     struct inner_thread *next;
 }inner_thread;
-
-typedef struct socket_pair_t{
-	int clt_id;
-	int p_s;
-    UT_hash_handle hh;
-}socket_pair;
 
 typedef struct proxy_address_t{
     struct sockaddr_in s_addr;
@@ -30,8 +37,12 @@ typedef struct proxy_node_t{
 	nid_t node_id; 
 	proxy_address sys_addr;
 	
-	socket_pair* hash_map;
+	socket_pair* leader_hash_map;
+    socket_pair* follower_hash_map;
 	inner_thread* inner_threads;
+
+    pthread_spinlock_t spinlock;
+    nc_t pair_count;
 	
     // log option
     int req_log;
@@ -50,7 +61,7 @@ typedef enum proxy_action_t{
 
 typedef struct proxy_msg_header_t{
     proxy_action action;
-    int clt_id;
+    uint16_t connection_id;
 }proxy_msg_header;
 #define PROXY_MSG_HEADER_SIZE (sizeof(proxy_msg_header))
 

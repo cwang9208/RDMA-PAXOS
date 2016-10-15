@@ -84,7 +84,7 @@ int store_record(db* db_p,size_t data_size,void* data){
     if ((ret=b_db->put(b_db,NULL,&key,&db_data,DB_AUTO_COMMIT|DB_APPEND))==0){
         //debug_log("db : %ld record stored. \n",*(uint64_t*)key_data);
         //b_db->sync(b_db,0);
-        debug_log("new record number is %lu\n", (u_long)recno);
+        //debug_log("new record number is %lu\n", (u_long)recno);
     }
     else{
         err_log("DB : %s.\n",db_strerror(ret));
