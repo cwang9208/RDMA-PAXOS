@@ -2299,26 +2299,20 @@ int_handler(int dummy)
     dare_state |= TERMINATE;
 }
 
-void leader_handle_submit_req( uint64_t req_id, uint16_t connection_id, uint8_t type, sm_cmd_t* cmd)
+uint64_t leader_handle_submit_req(uint64_t req_id, uint16_t connection_id, uint8_t type, void* buf, ssize_t data_size)
 {
 
-    uint64_t wait_for_idx = log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, connection_id, type, cmd);
-
-poll_committed_entries:
-    if (wait_for_idx > data.last_cmt_write_csm_idx)
-    	goto poll_committed_entries;
-    
-    free(cmd);
-
-    return;
+    uint64_t wait_for_idx = log_append_csm_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, connection_id, type, buf, data_size);
+    return wait_for_idx;
 }
 
-void *build_req_sub_msg(ssize_t data_size, void* buf)
+void leader_wait_for_commit(uint64_t wait_for_idx)
 {
-    sm_cmd_t *cmd = (sm_cmd_t*)malloc(sizeof(sm_cmd_t) + data_size);
-    cmd->len = data_size;
-    memcpy(cmd->cmd, buf, data_size);
-    return cmd;
+poll_committed_entries:
+    if (wait_for_idx > data.last_cmt_write_csm_idx)
+        goto poll_committed_entries;
+
+    return;
 }
 
 #endif
