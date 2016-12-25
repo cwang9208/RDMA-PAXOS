@@ -31,7 +31,7 @@ Sync() {
 StartDare() {
     for ((i=0; i<$1; ++i));
     do
-        config_dare=( "server_type=start" "server_idx=$i" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so" )
+        config_dare=( "server_type=start" "server_idx=$i" "group_size=$1" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so" )
         cmd=( "ssh" "$USER@${servers[$i]}" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
         pids[${servers[$i]}]=$("${cmd[@]}")
         echo "StartDare COMMAND: "${cmd[@]}
