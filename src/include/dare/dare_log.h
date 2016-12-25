@@ -527,7 +527,6 @@ log_append_csm_entry( dare_log_t* log,
                     void *data,
                     ssize_t len )
 {
-    uint64_t *head = (uint64_t*)data;
     if (type != HEAD) {
         /* Avoid double HEAD */
         prev_log_entry_head = 0;
