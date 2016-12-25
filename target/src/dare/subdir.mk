@@ -4,7 +4,7 @@
 
 CC = gcc
 
-FLAGS        = -fPIC -rdynamic -std=gnu99 -DDEBUG=$(DEBUGOPT)-I"$(ROOT_DIR)/../src/include/dare" -I"$(ROOT_DIR)/../utils/rbtree/include" -I/usr/include
+FLAGS        = -fPIC -rdynamic -std=gnu99 -DDEBUG=$(DEBUGOPT) -I"$(ROOT_DIR)/../src/include/dare" -I"$(ROOT_DIR)/../utils/rbtree/include" -I/usr/include
 CFLAGS       = #-Wall -Wunused-function #-Wextra
 LDFLAGS      = -L/usr/lib -libverbs
 
