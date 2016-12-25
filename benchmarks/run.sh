@@ -79,9 +79,9 @@ FindLeader() {
 StartBenchmark() {
     FindLeader
     if [[ "$APP" == "ssdb" ]]; then
-        run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" )
+        run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" "8888" "$request_count" "$client_count")
     elif [[ "$APP" == "redis" ]]; then
-        run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-h $leader" )
+        run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-t set,get" "-h $leader" "-n $request_count" "-c $client_count")
     fi
     
     cmd=( "ssh" "$USER@${client}" "${run_loop[@]}" ">" "benchmark_out.txt")
@@ -92,6 +92,8 @@ DAREDIR=$PWD/..
 run_dare=""
 server_count=3
 APP=""
+client_count=1
+request_count=10000
 for arg in "$@"
 do
     case ${arg} in
@@ -106,6 +108,13 @@ do
     --app=*)
         APP=`echo $arg | sed -e 's/--app=//'`
         APP=`eval echo ${APP}`    # tilde and variable expansion
+    --ccount=*)
+        client_count=`echo $arg | sed -e 's/--ccount=//'`
+        client_count=`eval echo ${client_count}`    # tilde and variable expansion
+    --rcount=*)
+        request_count=`echo $arg | sed -e 's/--rcount=//'`
+        request_count=`eval echo ${request_count}`    # tilde and variable expansion
+        ;;
     esac
 done
 
@@ -132,7 +141,7 @@ if [ $server_count -le 0 ]; then
     ErrorAndExit "0 < #servers; --scount"
 fi
 
-client=${nodes[-1]}
+client=${nodes[-2]}
 echo ">>> client: ${client}"
 
 for ((i=0; i<${server_count}; ++i)); do
