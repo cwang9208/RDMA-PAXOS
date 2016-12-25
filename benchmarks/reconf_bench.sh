@@ -140,6 +140,40 @@ RemoveServer() {
     fi
 }
 
+AddServer() {
+    if [[ ${#pids[@]} == $group_size ]]; then
+        # the group is full
+        group_size=$((group_size+2))
+    fi
+    for ((i=0; i<${group_size}; ++i)); do
+        srv=${servers[$i]}
+        next=0
+        for j in "${!pids[@]}"; do 
+            if [[ "x$srv" == "x$j" ]]; then
+               next=1
+               break
+            fi
+        done
+        if [[ $next == 1 ]]; then
+            continue
+        fi
+        break
+    done
+    if [[ "x${rounds[$srv]}" == "x" ]]; then
+        rounds[$srv]=1
+    fi
+    run_dare=( "${DAREDIR}/bin/srv_test" "-l $PWD/srv${i}_${rounds[$srv]}.log" "--join" "-n $srv" "-m $DGID" )
+    cmd=( "ssh" "$USER@$srv" "nohup" "${run_dare[@]}" "${redirection[@]}" "&" "echo \$!" )
+    pids[$srv]=$("${cmd[@]}")
+    rounds[$srv]=$((rounds[$srv] + 1))
+    #echo "COMMAND: "${cmd[@]}
+    echo -e "\tadded p$i ($srv)"
+    #echo -e "\n\tservers after adding p$i ($srv): ${!pids[@]}"
+    #echo -e "\t...and their PIDs: ${pids[@]}"
+}
+
+port=8888
+
 DAREDIR=$PWD/..
 APP=""
 for arg in "$@"
@@ -165,7 +199,7 @@ if [[ "x$APP" == "x" ]]; then
 elif [[ "$APP" == "ssdb" ]]; then
     run_dare="${DAREDIR}/apps/ssdb/ssdb-master/ssdb-server ${DAREDIR}/apps/ssdb/ssdb-master/ssdb.conf"
 elif [[ "$APP" == "redis" ]]; then
-    run_dare="${DAREDIR}/apps/redis/install/bin/redis-server"
+    run_dare="${DAREDIR}/apps/redis/install/bin/redis-server --port $port"
 fi
 
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
