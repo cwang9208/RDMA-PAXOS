@@ -108,9 +108,11 @@ do
     --app=*)
         APP=`echo $arg | sed -e 's/--app=//'`
         APP=`eval echo ${APP}`    # tilde and variable expansion
+        ;;
     --ccount=*)
         client_count=`echo $arg | sed -e 's/--ccount=//'`
         client_count=`eval echo ${client_count}`    # tilde and variable expansion
+        ;;
     --rcount=*)
         request_count=`echo $arg | sed -e 's/--rcount=//'`
         request_count=`eval echo ${request_count}`    # tilde and variable expansion
