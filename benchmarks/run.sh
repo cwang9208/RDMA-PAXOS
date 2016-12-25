@@ -76,12 +76,13 @@ FindLeader() {
     #echo "Leader: p${leader_idx} ($leader)"
 }
 
+port=8888
 StartBenchmark() {
     FindLeader
     if [[ "$APP" == "ssdb" ]]; then
-        run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" "8888" "$request_count" "$client_count")
+        run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" "$port" "$request_count" "$client_count")
     elif [[ "$APP" == "redis" ]]; then
-        run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-t set,get" "-h $leader" "-n $request_count" "-c $client_count")
+        run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-t set,get" "-h $leader" "-p $port" "-n $request_count" "-c $client_count")
     fi
     
     cmd=( "ssh" "$USER@${client}" "${run_loop[@]}" ">" "benchmark_out.txt")
@@ -125,9 +126,9 @@ if [[ "x$APP" == "x" ]]; then
 elif [[ "$APP" == "ssdb" ]]; then
     run_dare="${DAREDIR}/apps/ssdb/ssdb-master/ssdb-server ${DAREDIR}/apps/ssdb/ssdb-master/ssdb.conf"
 elif [[ "$APP" == "redis" ]]; then
-    run_dare="${DAREDIR}/apps/redis/install/bin/redis-server"
+    run_dare="${DAREDIR}/apps/redis/install/bin/redis-server --port $port"
 elif [[ "$APP" == "memcached" ]]; then
-    run_dare="${DAREDIR}/apps/memcached/install/bin/memcached"
+    run_dare="${DAREDIR}/apps/memcached/install/bin/memcached -p $port"
 fi
 
 
