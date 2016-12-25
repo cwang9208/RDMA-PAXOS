@@ -117,8 +117,6 @@ static hk_t gen_key(nid_t node_id,nc_t node_count){
 
 void process_data(proxy_node* proxy, uint8_t type, ssize_t data_size, void* buf, int clt_id)
 {
-    void *cmd = build_req_sub_msg(data_size, buf);
-
     socket_pair* pair = NULL;
     uint64_t req_id;
     uint16_t connection_id;
@@ -155,8 +153,10 @@ void process_data(proxy_node* proxy, uint8_t type, ssize_t data_size, void* buf,
             HASH_DEL(proxy->leader_hash_map, pair);
             break;
     }
-    leader_handle_submit_req(req_id, connection_id, type, cmd);
+    uint64_t wait_for_idx = leader_handle_submit_req(req_id, connection_id, type, buf, data_size);
     pthread_spin_unlock(&proxy->spinlock);
+    leader_wait_for_commit(wait_for_idx);
+    return;
 }
 
 void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
