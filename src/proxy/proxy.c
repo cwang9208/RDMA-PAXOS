@@ -15,7 +15,7 @@ static void process_data(proxy_node* proxy, uint8_t type, ssize_t data_size, voi
 
 FILE *log_fp;
 
-int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
+int dare_main(proxy_node* proxy)
 {
     int rc; 
     dare_server_input_t *input = (dare_server_input_t*)malloc(sizeof(dare_server_input_t));
@@ -24,8 +24,14 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
     input->output = "dare_servers.out";
     input->srv_type = SRV_TYPE_START;
     input->sm_type = CLT_KVS;
-    input->group_size = 3;
     input->server_idx = 0xFF;
+    char *server_idx = getenv("server_idx");
+    if (server_idx != NULL)
+        input->server_idx = (uint8_t)atoi(server_idx);
+    input->group_size = 3;
+    char *group_size = getenv("group_size");
+    if (group_size != NULL)
+        input->group_size = (uint8_t)atoi(group_size);
 
     input->do_action = do_action_to_server;
     input->store_cmd = stablestorage_save_request;
@@ -34,7 +40,6 @@ int dare_main(node_id_t node_id, uint8_t group_size, proxy_node* proxy)
 
     // parser
     input->group_size = group_size;
-    input->server_idx = node_id;
 
     const char *server_type = getenv("server_type");
     if (strcmp(server_type, "join") == 0)
@@ -325,7 +330,7 @@ do_action_close_exit:
 	return;
 }
 
-proxy_node* proxy_init(node_id_t node_id,const char* config_path,const char* proxy_log_path)
+proxy_node* proxy_init(const char* config_path,const char* proxy_log_path)
 {
     proxy_node* proxy = (proxy_node*)malloc(sizeof(proxy_node));
 
@@ -336,7 +341,6 @@ proxy_node* proxy_init(node_id_t node_id,const char* config_path,const char* pro
 
     memset(proxy,0,sizeof(proxy_node));
     
-    proxy->node_id = node_id;
     if(proxy_read_config(proxy,config_path)){
         err_log("PROXY : Configuration File Reading Error.\n");
         goto proxy_exit_error;
@@ -360,7 +364,7 @@ proxy_node* proxy_init(node_id_t node_id,const char* config_path,const char* pro
             char* req_log_path = (char*)malloc(sizeof(char)*strlen(proxy_log_path)+50);
             memset(req_log_path,0,sizeof(char)*strlen(proxy_log_path)+50);
             if(NULL!=req_log_path){
-                sprintf(req_log_path,"%s/node-%u-proxy-req.log",proxy_log_path,proxy->node_id);
+                sprintf(req_log_path,"%s/node-proxy-req.log",proxy_log_path);
                 //err_log("%s.\n",req_log_path);
                 proxy->req_log_file = fopen(req_log_path,"w");
                 free(req_log_path);
@@ -383,7 +387,7 @@ proxy_node* proxy_init(node_id_t node_id,const char* config_path,const char* pro
 	
     proxy->inner_threads = NULL;
 
-	dare_main(node_id, proxy->group_size, proxy);
+	dare_main(proxy);
 
     return proxy;
 
