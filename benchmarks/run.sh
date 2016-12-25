@@ -121,7 +121,7 @@ fi
 
 
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
-nodes=(10.22.1.1 10.22.1.2 10.22.1.3 10.22.1.4 10.22.1.5 10.22.1.6 10.22.1.7 10.22.1.8 10.22.1.9)
+nodes=(10.22.1.1 10.22.1.2 10.22.1.3 10.22.1.4 10.22.1.5 10.22.1.6 10.22.1.7 10.22.1.8 10.22.1.9 202.45.128.159)
 node_count=${#nodes[@]}
 echo "Allocated ${node_count} nodes:" > nodes
 for ((i=0; i<${node_count}; ++i)); do
@@ -132,7 +132,7 @@ if [ $server_count -le 0 ]; then
     ErrorAndExit "0 < #servers; --scount"
 fi
 
-client=${nodes[0]}
+client=${nodes[-1]}
 echo ">>> client: ${client}"
 
 for ((i=0; i<${server_count}; ++i)); do
