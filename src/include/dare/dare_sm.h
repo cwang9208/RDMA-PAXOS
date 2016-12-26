@@ -40,23 +40,22 @@ typedef void (*destroy_cb_t)(dare_sm_t *sm);
 typedef int (*apply_cmd_cb_t)(dare_sm_t *sm, sm_cmd_t *cmd, sm_data_t *data);
 /* Get the size (in bytes) of the state machine */
 typedef uint32_t (*get_sm_size_cb_t)(dare_sm_t *sm);
-/* Make a snapshot of the state machine */
-typedef void (*create_snapshot_cb_t)(dare_sm_t *sm, void *snapshot);
 /* Apply a snapshot to the state machine */
 typedef int (*apply_snapshot_cb_t)(dare_sm_t *sm, void *snapshot, uint32_t size);
 
 typedef void (*proxy_store_cmd_cb_t)(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
 typedef void (*proxy_do_action_cb_t)(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
+typedef void (*proxy_create_snapshot_cb_t)(void *snapshot,void *arg);
 
 struct dare_sm_t {
     destroy_cb_t   destroy;
     apply_cmd_cb_t apply_cmd;
     get_sm_size_cb_t get_sm_size;
-    create_snapshot_cb_t create_snapshot;
     apply_snapshot_cb_t apply_snapshot;
 
     proxy_store_cmd_cb_t proxy_store_cmd;
     proxy_do_action_cb_t proxy_do_action;
+    proxy_create_snapshot_cb_t proxy_create_snapshot;
     void* up_para;
 };
 

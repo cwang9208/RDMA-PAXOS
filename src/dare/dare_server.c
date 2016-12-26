@@ -292,6 +292,7 @@ init_server_data()
     }
     data.sm->proxy_store_cmd = data.input->store_cmd;
     data.sm->proxy_do_action = data.input->do_action;
+    data.sm->proxy_create_snapshot = data.input->create_snapshot;
     data.sm->up_para = data.input->up_para;
 
     /* Set up the configuration */
@@ -633,7 +634,7 @@ poll_sm_requests()
         if (!(dare_state & SNAPSHOT)) {
             /* There is no snapshot */
             info(log_fp, "   # no snapshot\n");
-            uint32_t len = data.sm->get_sm_size(data.sm);
+            uint32_t len = data.sm->create_snapshot(snapshot->data,data.sm->up_para);
             info(log_fp, "   # snapshot len = %"PRIu32"\n", len);
             if (len <= PREREG_SNAPSHOT_SIZE) {
                 info(log_fp, "   # pre-register snapshot\n");
@@ -655,7 +656,7 @@ poll_sm_requests()
             }
             snapshot->len = len;
             snapshot->last_entry = last_applied_entry;
-            data.sm->create_snapshot(data.sm, snapshot->data);
+            
             /* Avoid updating the snapshot before the head offset is modified */
             dare_state |= SNAPSHOT;
         }
@@ -1214,8 +1215,6 @@ check_failure_count()
             /* In stable configuration, the leader can remove 
             unresponsive servers (on the CTRL QP) */ 
             if ( (IS_LEADER) && (CID_STABLE == data.config.cid.state) ) {
-            //log_append_non_csm_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 0, 0, 
-              //  NOOP, NULL);
                 dare_ib_disconnect_server(i);
                 CID_SERVER_RM(cid, i);
                 info_wtime(log_fp, "REMOVE SERVER p%"PRIu8"\n", i);

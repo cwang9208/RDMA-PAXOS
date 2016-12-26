@@ -51,8 +51,6 @@ static void
 destroy_kvs_sm( dare_sm_t* sm );
 static int 
 apply_kvs_cmd( dare_sm_t *sm, sm_cmd_t *cmd, sm_data_t *data );
-static void 
-create_kvs_snapshot( dare_sm_t *sm, void *snapshot );
 static int 
 apply_kvs_snapshot( dare_sm_t *sm, void *snapshot, uint32_t size );
 static uint32_t 
@@ -101,7 +99,6 @@ dare_sm_t* create_kvs_sm( uint32_t size )
         .destroy   = destroy_kvs_sm,
         .apply_cmd = apply_kvs_cmd,
         .get_sm_size = get_kvs_sm_size,
-        .create_snapshot = create_kvs_snapshot, 
         .apply_snapshot = apply_kvs_snapshot
     };
 
@@ -214,36 +211,6 @@ static uint32_t
 get_kvs_sm_size( dare_sm_t *sm )
 {
     return kvs_size;
-}
-
-static void 
-create_kvs_snapshot( dare_sm_t *sm, void *snapshot )
-{
-    uint32_t i;
-    dare_kvs_sm_t *kvs_sm = (dare_kvs_sm_t*)sm;
-    kvs_list_t *list;
-    kvs_snapshot_entry_t *kvs_snapshot = 
-                    (kvs_snapshot_entry_t*)snapshot;
-    
-    if (NULL == kvs_sm) {
-        return;
-    }
-    if (NULL == kvs_sm->kvs_table.table) {
-        return;
-    }
-    for (i = 0; i < kvs_sm->kvs_table.size; i++) {
-        list = kvs_sm->kvs_table.table[i];
-        while (NULL != list) {
-            /* Copy entry to the snapshot */
-            memcpy(kvs_snapshot->key, list->entry.key, KEY_SIZE);
-            kvs_snapshot->len = list->entry.blob.len;
-            memcpy(kvs_snapshot->value, list->entry.blob.data, 
-                    kvs_snapshot->len);
-            kvs_snapshot += sizeof(kvs_snapshot_entry_t) 
-                            + list->entry.blob.len;
-            list = list->next;
-        }
-    }
 }
 
 static int 

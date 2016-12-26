@@ -33,6 +33,7 @@ int dare_main(proxy_node* proxy)
 
     input->do_action = do_action_to_server;
     input->store_cmd = stablestorage_save_request;
+    input->create_snapshot = create_snapshot;
     input->up_para = proxy;
     static int srv_type = SRV_TYPE_START;
 

@@ -155,6 +155,7 @@ struct dare_server_input_t {
     
     proxy_do_action_cb_t do_action;
     proxy_store_cmd_cb_t store_cmd;
+    proxy_create_snapshot_cb_t create_snapshot;
     void* up_para;
 };
 typedef struct dare_server_input_t dare_server_input_t;

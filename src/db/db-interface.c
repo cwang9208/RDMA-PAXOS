@@ -95,56 +95,32 @@ db_store_return:
     return ret;
 }
 
-int retrieve_record(db* db_p,size_t key_size,void* key_data,size_t* data_size,void** data){
-    int ret=1;
-    if(NULL==db_p || NULL==db_p->bdb_ptr){
-        if(db_p == NULL){
-          err_log("DB retrieve_record : db_p is null.\n");
-        } else{
-          err_log("DB retrieve_record : db_p->bdb_ptr is null.\n");
-        }
-        goto db_retrieve_return;
-    }
+int traverse_db(db* db_p, uint8_t* buf){
     DB* b_db = db_p->bdb_ptr;
-    DBT key,db_data;
-    memset(&key,0,sizeof(key));
-    memset(&db_data,0,sizeof(db_data));
-    key.data = key_data;
-    key.size = key_size;
-    db_data.flags = DB_DBT_MALLOC;
-    if((ret=b_db->get(b_db,NULL,&key,&db_data,0))==0){
-        //debug_log("db : get record %ld from database.\n",*(uint64_t*)key_data);
-    }else{
-        //debug_log("db : can not get record %ld from database.\n",*(uint64_t*)key_data);
-        err_log("DB : %s.\n",db_strerror(ret));
-        //b_db->err(b_db,ret,"DB->Get");
-        goto db_retrieve_return;
+    DBT key, data;
+    DBC *dbcp;
+    /* Acquire a cursor for the database. */
+    if ((ret = b_db->cursor(b_db, NULL, &dbcp, 0)) != 0) {
+        b_db->err(b_db, ret, "DB->cursor");
+        return (1);
     }
-    if(!db_data.size){
-        goto db_retrieve_return;
-    }
-    *data = db_data.data;
-    *data_size = db_data.size;
-db_retrieve_return:
-    return ret;
-}
 
+    /* Re-initialize the key/data pair. */
+    memset(&key, 0, sizeof(key));
+    memset(&data, 0, sizeof(data));
 
-int delete_record(db* db_p,size_t key_size,void* key_data){
-    int ret=1;
-    if(NULL==db_p || NULL==db_p->bdb_ptr){
-        goto db_delete_return;
+    /* Walk through the database and print out the key/data pairs. */
+    while ((ret = dbcp->c_get(dbcp, &key, &data, DB_NEXT)) == 0) {
+        //debug_log("%lu : %.*s\n", *(u_long *)key.data, (int)data.size, (char *)data.data);
+        memcpy(buf, data.data, data.size);
+        buf += data.size;
     }
-    DB* b_db = db_p->bdb_ptr;
-    DBT key;
-    memset(&key,0,sizeof(key));
-    key.data = key_data;
-    key.size = key_size;
-    ret=b_db->del(b_db,NULL,&key,0);
-    if(ret!=0){
-        //b_db->err(b_db,ret,"DB->Delete");
-        err_log("DB : %s.\n",db_strerror(ret));
+    if (ret != DB_NOTFOUND)
+        b_db->err(b_db, ret, "DBcursor->get");
+
+    /* Close the cursor. */
+    if ((ret = dbcp->c_close(dbcp)) != 0) {
+        b_db->err(b_db, ret, "DBcursor->close");
+        return (1);
     }
-db_delete_return:
-    return ret;
 }
