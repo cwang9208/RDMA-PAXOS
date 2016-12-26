@@ -6,6 +6,7 @@
 
 static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg);
 static uint32_t stablestorage_dump(void*buf,void*arg);
+static int stablestorage_load(void*buf,uint32_t size,void*arg);
 static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
 static void do_action_connect(uint16_t clt_id,size_t data_size,void* data,void* arg);
 static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg);
@@ -35,6 +36,7 @@ int dare_main(proxy_node* proxy)
     input->do_action = do_action_to_server;
     input->store_cmd = stablestorage_save_request;
     input->create_db_snapshot = stablestorage_dump;
+    input->apply_db_snapshot = stablestorage_load;
     input->up_para = proxy;
     static int srv_type = SRV_TYPE_START;
 
@@ -181,6 +183,36 @@ static uint32_t stablestorage_dump(void*buf,void*arg)
     proxy_node* proxy = arg;
     uint32_t size = dump_records(proxy->db_ptr,buf);
     return size;
+}
+
+static int stablestorage_load(void*buf,uint32_t size,void*arg)
+{
+    proxy_msg_header* header = (proxy_msg_header*)buf;
+    size_t data_size = 0;
+    uint32_t len = 0;
+    void* data = NULL;
+    while(len < size) {
+        header = (proxy_msg_header*)((char*)buf + len);
+        switch(header->action){
+            case SEND:
+            {
+                proxy_send_msg* send_msg = (proxy_send_msg*)buf;
+                data_size = send_msg->data_size;;
+                data = send_msg->data;
+                len += PROXY_SEND_MSG_SIZE(send_msg);
+            }
+            case CONNECT:
+            {
+                len += PROXY_CONNECT_MSG_SIZE;
+            }
+            case CLOSE:
+            {
+                len += PROXY_CLOSE_MSG_SIZE;
+            }
+        }
+        do_action_to_server(header->connection_id, header->action, data_size, data ,arg);
+    }
+    return 0;
 }
 
 static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg)

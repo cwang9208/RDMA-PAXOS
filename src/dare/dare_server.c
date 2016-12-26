@@ -293,6 +293,7 @@ init_server_data()
     data.sm->proxy_store_cmd = data.input->store_cmd;
     data.sm->proxy_do_action = data.input->do_action;
     data.sm->proxy_create_db_snapshot = data.input->create_db_snapshot;
+    data.sm->proxy_apply_db_snapshot = data.input->apply_db_snapshot;
     data.sm->up_para = data.input->up_para;
 
     /* Set up the configuration */

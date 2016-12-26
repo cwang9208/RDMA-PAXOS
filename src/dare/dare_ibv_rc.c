@@ -682,8 +682,7 @@ int rc_recover_sm( uint8_t target )
     info(log_fp, "   # snapshot recovered; apply it\n");
     
     /* Successfully recovered the snapshot - apply it */
-    rc = SRV_DATA->sm->apply_snapshot(SRV_DATA->sm, snapshot->data, 
-                snapshot->len);
+    rc = SRV_DATA->sm->proxy_apply_db_snapshot(snapshot->data, snapshot->len, SRV_DATA->sm->up_para);
     if (0 != rc) {
         error_return(1, log_fp, "Cannot apply SM snapshot\n");
     }

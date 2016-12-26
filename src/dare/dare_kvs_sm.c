@@ -51,8 +51,6 @@ static void
 destroy_kvs_sm( dare_sm_t* sm );
 static int 
 apply_kvs_cmd( dare_sm_t *sm, sm_cmd_t *cmd, sm_data_t *data );
-static int 
-apply_kvs_snapshot( dare_sm_t *sm, void *snapshot, uint32_t size );
 
 static uint32_t 
 hash( kvs_table_t *kvs_table, char *key );
@@ -96,7 +94,6 @@ dare_sm_t* create_kvs_sm( uint32_t size )
     dare_sm_t sm = {
         .destroy   = destroy_kvs_sm,
         .apply_cmd = apply_kvs_cmd,
-        .apply_snapshot = apply_kvs_snapshot
     };
 
     memcpy(&kvs_sm->sm, &sm, sizeof(dare_sm_t));
@@ -199,36 +196,6 @@ apply_kvs_cmd( dare_sm_t* sm, sm_cmd_t *cmd, sm_data_t *data )
             break;
         default:
             error_return(1, log_fp, "Unknown KVS command\n");
-    }
-    
-    return 0;
-}
-
-static int 
-apply_kvs_snapshot( dare_sm_t *sm, void *snapshot, uint32_t size )
-{
-    int rc;
-    kvs_blob_t blob;
-    dare_kvs_sm_t *kvs_sm = (dare_kvs_sm_t*)sm;
-    if (NULL == kvs_sm) {
-        error_return(1, log_fp, "SM is NULL\n");
-    }
-    kvs_snapshot_entry_t *kvs_snapshot = 
-                    (kvs_snapshot_entry_t*)snapshot;
-    if (NULL == kvs_snapshot) {
-        error_return(1, log_fp, "SM snapshot is NULL\n");
-    }
-    //info(log_fp, "   # applying snapshot; size = %"PRIu32"\n", size);
-    uint64_t snapshot_end = (uint64_t)snapshot + size;
-    while ((uint64_t)kvs_snapshot < snapshot_end) {
-        blob.len = kvs_snapshot->len;
-        blob.data = kvs_snapshot->value;
-        //info(log_fp, "   # entry=(%.64s,%.*s)\n", kvs_snapshot->key, blob.len, blob.data);
-        rc = write_key(&kvs_sm->kvs_table, kvs_snapshot->key, &blob);
-        if (0 != rc) {               
-            error_return(1, log_fp, "Cannot apply snapshot\n");
-        }
-        kvs_snapshot += sizeof(kvs_snapshot_entry_t) + blob.len;
     }
     
     return 0;
