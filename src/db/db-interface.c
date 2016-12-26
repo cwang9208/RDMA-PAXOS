@@ -95,14 +95,17 @@ db_store_return:
     return ret;
 }
 
-int traverse_db(db* db_p, uint8_t* buf){
+uint32_t dump_records(db* db_p, void* buf){
     DB* b_db = db_p->bdb_ptr;
     DBT key, data;
     DBC *dbcp;
+    int ret;
+
+    uint32_t size = 0;
+
     /* Acquire a cursor for the database. */
     if ((ret = b_db->cursor(b_db, NULL, &dbcp, 0)) != 0) {
         b_db->err(b_db, ret, "DB->cursor");
-        return (1);
     }
 
     /* Re-initialize the key/data pair. */
@@ -112,8 +115,8 @@ int traverse_db(db* db_p, uint8_t* buf){
     /* Walk through the database and print out the key/data pairs. */
     while ((ret = dbcp->c_get(dbcp, &key, &data, DB_NEXT)) == 0) {
         //debug_log("%lu : %.*s\n", *(u_long *)key.data, (int)data.size, (char *)data.data);
-        memcpy(buf, data.data, data.size);
-        buf += data.size;
+        memcpy((char*)buf+size, data.data, data.size);
+        size += data.size;
     }
     if (ret != DB_NOTFOUND)
         b_db->err(b_db, ret, "DBcursor->get");
@@ -121,6 +124,7 @@ int traverse_db(db* db_p, uint8_t* buf){
     /* Close the cursor. */
     if ((ret = dbcp->c_close(dbcp)) != 0) {
         b_db->err(b_db, ret, "DBcursor->close");
-        return (1);
     }
+
+    return size;
 }

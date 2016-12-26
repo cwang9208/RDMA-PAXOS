@@ -53,8 +53,6 @@ static int
 apply_kvs_cmd( dare_sm_t *sm, sm_cmd_t *cmd, sm_data_t *data );
 static int 
 apply_kvs_snapshot( dare_sm_t *sm, void *snapshot, uint32_t size );
-static uint32_t 
-get_kvs_sm_size( dare_sm_t *sm );
 
 static uint32_t 
 hash( kvs_table_t *kvs_table, char *key );
@@ -98,7 +96,6 @@ dare_sm_t* create_kvs_sm( uint32_t size )
     dare_sm_t sm = {
         .destroy   = destroy_kvs_sm,
         .apply_cmd = apply_kvs_cmd,
-        .get_sm_size = get_kvs_sm_size,
         .apply_snapshot = apply_kvs_snapshot
     };
 
@@ -205,12 +202,6 @@ apply_kvs_cmd( dare_sm_t* sm, sm_cmd_t *cmd, sm_data_t *data )
     }
     
     return 0;
-}
-
-static uint32_t 
-get_kvs_sm_size( dare_sm_t *sm )
-{
-    return kvs_size;
 }
 
 static int 

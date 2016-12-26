@@ -292,7 +292,7 @@ init_server_data()
     }
     data.sm->proxy_store_cmd = data.input->store_cmd;
     data.sm->proxy_do_action = data.input->do_action;
-    data.sm->proxy_create_snapshot = data.input->create_snapshot;
+    data.sm->proxy_create_db_snapshot = data.input->create_db_snapshot;
     data.sm->up_para = data.input->up_para;
 
     /* Set up the configuration */
@@ -634,7 +634,7 @@ poll_sm_requests()
         if (!(dare_state & SNAPSHOT)) {
             /* There is no snapshot */
             info(log_fp, "   # no snapshot\n");
-            uint32_t len = data.sm->create_snapshot(snapshot->data,data.sm->up_para);
+            uint32_t len = data.sm->proxy_create_db_snapshot(snapshot->data,data.sm->up_para);
             info(log_fp, "   # snapshot len = %"PRIu32"\n", len);
             if (len <= PREREG_SNAPSHOT_SIZE) {
                 info(log_fp, "   # pre-register snapshot\n");

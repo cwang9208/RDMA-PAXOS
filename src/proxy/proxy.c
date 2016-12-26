@@ -5,6 +5,7 @@
 #define __STDC_FORMAT_MACROS
 
 static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg);
+static uint32_t stablestorage_dump(void*buf,void*arg);
 static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
 static void do_action_connect(uint16_t clt_id,size_t data_size,void* data,void* arg);
 static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg);
@@ -33,7 +34,7 @@ int dare_main(proxy_node* proxy)
 
     input->do_action = do_action_to_server;
     input->store_cmd = stablestorage_save_request;
-    input->create_snapshot = create_snapshot;
+    input->create_db_snapshot = stablestorage_dump;
     input->up_para = proxy;
     static int srv_type = SRV_TYPE_START;
 
@@ -173,6 +174,13 @@ static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_
             break;
         }
     }
+}
+
+static uint32_t stablestorage_dump(void*buf,void*arg)
+{
+    proxy_node* proxy = arg;
+    uint32_t size = dump_records(proxy->db_ptr,buf);
+    return size;
 }
 
 static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg)

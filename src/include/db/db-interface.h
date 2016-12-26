@@ -13,7 +13,5 @@ int store_record(db*,size_t,void*);
 
 // the caller is responsible to release the memory
 
-int retrieve_record(db*,size_t,void*,size_t*,void**);
-
-int delete_record(db*,size_t,void*);
+uint32_t dump_records(db*,void*);
 #endif
