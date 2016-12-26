@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <netinet/tcp.h>
 #define __STDC_FORMAT_MACROS
-//#include "../include/dare/dare_server.h"
 
 static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg);
 static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);

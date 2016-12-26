@@ -18,16 +18,6 @@ ErrorAndExit () {
   exit 1
 }
 
-Sync() {
-    sed -i "s/group_size = .*/group_size = $1;/" ${DAREDIR}/target/nodes.local.cfg
-    for ((i=0; i<$1; ++i));
-    do
-        cmd=( "scp" "${DAREDIR}/target/nodes.local.cfg" "$USER@${servers[$i]}:${DAREDIR}/target/" )
-        $("${cmd[@]}")
-        echo "Sync COMMAND: "${cmd[@]}
-    done
-}
-
 ForceAbsolutePath () {
   case "$2" in
     /* )
@@ -41,7 +31,7 @@ ForceAbsolutePath () {
 StartDare() {
     for ((i=0; i<${group_size}; ++i)); do
         srv=${servers[$i]}
-        config_dare=( "server_type=start" "server_idx=$i" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}_1.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so" "$BIN")
+        config_dare=( "server_type=start" "server_idx=$i" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}_1.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so")
         cmd=( "ssh" "$USER@${servers[$i]}" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
         pids[$srv]=$("${cmd[@]}")
         rounds[$srv]=2
@@ -210,7 +200,7 @@ echo "Allocated ${node_count} nodes:" > nodes
 for ((i=0; i<${node_count}; ++i)); do
     echo "$i:${nodes[$i]}" >> nodes
 done
-group_size=9
+group_size=5
 
 for ((i=0; i<$node_count; ++i)); do
     servers[${i}]=${nodes[$i]}
@@ -230,7 +220,6 @@ Stop() {
 }
 
 Start() {
-    Sync $group_size
     echo -e "Starting $group_size servers..."
     StartDare
     echo "done"
@@ -278,14 +267,20 @@ FailServer() {
 
 ########################################################################
 
+# Start DARE (size = 5)
 Start
 
-sleep 8
+# Upsize (size = 6)
+Upsize
 
+# Upsize (size = 7)
+Upsize
+
+# Remove the leader (size = 6)
 FailLeader
 
-sleep 6
-
+# Remove a server that is not the leader (size = 5)
 FailServer 
 
-FailLeader stop
+# Add a server (size = 6)
+RecoverServer stop

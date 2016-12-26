@@ -18,16 +18,6 @@ ErrorAndExit () {
   exit 1
 }
 
-Sync() {
-    sed -i "s/group_size = .*/group_size = $1;/" ${DAREDIR}/target/nodes.local.cfg
-    for ((i=0; i<$1; ++i));
-    do
-        cmd=( "scp" "${DAREDIR}/target/nodes.local.cfg" "$USER@${servers[$i]}:${DAREDIR}/target/" )
-        $("${cmd[@]}")
-        echo "Sync COMMAND: "${cmd[@]}
-    done
-}
-
 StartDare() {
     for ((i=0; i<$1; ++i));
     do
@@ -156,7 +146,6 @@ DGID="ff0e::ffff:e101:101"
 
 ########################################################################
 
-Sync $server_count
 echo -ne "Starting $server_count servers...\n"
 StartDare $server_count
 echo "done"
