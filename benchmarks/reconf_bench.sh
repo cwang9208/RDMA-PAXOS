@@ -152,8 +152,8 @@ AddServer() {
     if [[ "x${rounds[$srv]}" == "x" ]]; then
         rounds[$srv]=1
     fi
-    run_dare=( "${DAREDIR}/bin/srv_test" "-l $PWD/srv${i}_${rounds[$srv]}.log" "--join" "-n $srv" "-m $DGID" )
-    cmd=( "ssh" "$USER@$srv" "nohup" "${run_dare[@]}" "${redirection[@]}" "&" "echo \$!" )
+    config_dare=( "server_type=join" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}_${rounds[$srv]}.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so")
+    cmd=( "ssh" "$USER@$srv" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
     pids[$srv]=$("${cmd[@]}")
     rounds[$srv]=$((rounds[$srv] + 1))
     #echo "COMMAND: "${cmd[@]}
