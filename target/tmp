@@ -1,0 +1,1451 @@
+##### BUILDING Red-Black Tree #####
+mkdir -pm 755 /home/cheng/Downloads/RDMA-PAXOS/target/src/dare/lib
+ar -rcs /home/cheng/Downloads/RDMA-PAXOS/target/src/dare/lib/librbtree.a /home/cheng/Downloads/RDMA-PAXOS/target/../utils/rbtree/src/rbtree.o
+##############################
+
+##### BUILDING DARE #####
+mkdir -pm 755 /home/cheng/Downloads/RDMA-PAXOS/target/src/dare/lib
+ar -rcs /home/cheng/Downloads/RDMA-PAXOS/target/src/dare/lib/libdare.a /home/cheng/Downloads/RDMA-PAXOS/target/../src/dare/dare_ep_db.o /home/cheng/Downloads/RDMA-PAXOS/target/../src/dare/dare_ibv.o /home/cheng/Downloads/RDMA-PAXOS/target/../src/dare/dare_ibv_rc.o /home/cheng/Downloads/RDMA-PAXOS/target/../src/dare/dare_ibv_ud.o /home/cheng/Downloads/RDMA-PAXOS/target/../src/dare/dare_kvs_sm.o /home/cheng/Downloads/RDMA-PAXOS/target/../src/dare/dare_server.o /home/cheng/Downloads/RDMA-PAXOS/target/../utils/rbtree/src/rbtree.o
+##############################
+
+Building file: ../src/proxy/proxy.c
+Invoking: GCC C Compiler
+gcc -fPIC -rdynamic -std=gnu99 -DDEBUG=0 -O0 -g3 -Wall -c -o "src/proxy/proxy.o" "../src/proxy/proxy.c"
+../src/proxy/proxy.c: In function ‘do_action_connect’:
+../src/proxy/proxy.c:214:5: error: unknown type name ‘socket_pair’
+     socket_pair* ret;
+     ^
+In file included from ../src/proxy/../include/proxy/../dare/dare_server.h:22:0,
+                 from ../src/proxy/../include/proxy/proxy.h:10,
+                 from ../src/proxy/proxy.c:1:
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:612:14: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.keylen == keylen_in) {                                           \
+              ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:215:5: note: in expansion of macro ‘HASH_FIND’
+     HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:613:31: error: request for member ‘hh’ in something not a structure or union
+         if ((HASH_KEYCMP((out)->hh.key,keyptr,keylen_in)) == 0) break;             \
+                               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:604:37: note: in definition of macro ‘HASH_KEYCMP’
+ #define HASH_KEYCMP(a,b,len) memcmp(a,b,len)
+                                     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:215:5: note: in expansion of macro ‘HASH_FIND’
+     HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:14: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+              ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:215:5: note: in expansion of macro ‘HASH_FIND’
+     HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:70: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+                                                                      ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:58:25: note: in definition of macro ‘DECLTYPE_ASSIGN’
+   (dst) = DECLTYPE(dst)(src);                                                    \
+                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:48: note: in expansion of macro ‘ELMT_FROM_HH’
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+                                                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:215:5: note: in expansion of macro ‘HASH_FIND’
+     HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+     ^
+../src/proxy/proxy.c:218:29: error: ‘socket_pair’ undeclared (first use in this function)
+         ret = malloc(sizeof(socket_pair));
+                             ^
+../src/proxy/proxy.c:218:29: note: each undeclared identifier is reported only once for each function it appears in
+../src/proxy/proxy.c:221:12: error: request for member ‘connection_id’ in something not a structure or union
+         ret->connection_id = clt_id;
+            ^
+../src/proxy/proxy.c:228:12: error: request for member ‘p_s’ in something not a structure or union
+         ret->p_s = sockfd;
+            ^
+In file included from ../src/proxy/../include/proxy/../dare/dare_server.h:22:0,
+                 from ../src/proxy/../include/proxy/proxy.h:10,
+                 from ../src/proxy/proxy.c:1:
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:185:7: error: request for member ‘hh’ in something not a structure or union
+  (add)->hh.next = NULL;                                                          \
+       ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:186:7: error: request for member ‘hh’ in something not a structure or union
+  (add)->hh.key = (char*)(keyptr);                                                \
+       ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:40: error: request for member ‘connection_id’ in something not a structure or union
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+                                        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:186:26: note: in definition of macro ‘HASH_ADD_KEYPTR’
+  (add)->hh.key = (char*)(keyptr);                                                \
+                          ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:187:7: error: request for member ‘hh’ in something not a structure or union
+  (add)->hh.keylen = (unsigned)(keylen_in);                                       \
+       ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:189:10: warning: assignment from incompatible pointer type [enabled by default]
+     head = (add);                                                                \
+          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:194:10: error: request for member ‘hh’ in something not a structure or union
+     (add)->hh.prev = ELMT_FROM_HH((head)->hh.tbl, (head)->hh.tbl->tail);         \
+          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:195:35: error: request for member ‘hh’ in something not a structure or union
+     (head)->hh.tbl->tail = &((add)->hh);                                         \
+                                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:198:7: error: request for member ‘hh’ in something not a structure or union
+  (add)->hh.tbl = (head)->hh.tbl;                                                 \
+       ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:40: error: request for member ‘connection_id’ in something not a structure or union
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+                                        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:429:43: note: in definition of macro ‘HASH_JEN’
+   unsigned char *_hj_key=(unsigned char*)(key);                                  \
+                                           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:430:3: note: in definition of macro ‘HASH_JEN’
+   hashv = 0xfeedbeef;                                                            \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:440:5: note: in definition of macro ‘HASH_JEN’
+     hashv += (_hj_key[8] + ( (unsigned)_hj_key[9] << 8 )                         \
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:415:16: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 13 );                                              \
+                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:415:26: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 13 );                                              \
+                          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:416:8: note: in definition of macro ‘HASH_JEN_MIX’
+   b -= c; b -= a; b ^= ( a << 8 );                                               \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:417:3: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 13 );                                              \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:417:11: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 13 );                                              \
+           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:417:19: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 13 );                                              \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:418:16: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 12 );                                              \
+                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:418:26: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 12 );                                              \
+                          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:419:8: note: in definition of macro ‘HASH_JEN_MIX’
+   b -= c; b -= a; b ^= ( a << 16 );                                              \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:420:3: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 5 );                                               \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:420:11: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 5 );                                               \
+           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:420:19: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 5 );                                               \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:421:16: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 3 );                                               \
+                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:421:26: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 3 );                                               \
+                          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:422:8: note: in definition of macro ‘HASH_JEN_MIX’
+   b -= c; b -= a; b ^= ( a << 10 );                                              \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:423:3: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 15 );                                              \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:423:11: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 15 );                                              \
+           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:423:19: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 15 );                                              \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:449:3: note: in definition of macro ‘HASH_JEN’
+   hashv += keylen;                                                               \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:451:15: note: in definition of macro ‘HASH_JEN’
+      case 11: hashv += ( (unsigned)_hj_key[10] << 24 );                          \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:452:15: note: in definition of macro ‘HASH_JEN’
+      case 10: hashv += ( (unsigned)_hj_key[9] << 16 );                           \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:453:15: note: in definition of macro ‘HASH_JEN’
+      case 9:  hashv += ( (unsigned)_hj_key[8] << 8 );                            \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:415:16: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 13 );                                              \
+                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:415:26: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 13 );                                              \
+                          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:416:8: note: in definition of macro ‘HASH_JEN_MIX’
+   b -= c; b -= a; b ^= ( a << 8 );                                               \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:417:3: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 13 );                                              \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:417:11: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 13 );                                              \
+           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:417:19: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 13 );                                              \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:418:16: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 12 );                                              \
+                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:418:26: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 12 );                                              \
+                          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:419:8: note: in definition of macro ‘HASH_JEN_MIX’
+   b -= c; b -= a; b ^= ( a << 16 );                                              \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:420:3: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 5 );                                               \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:420:11: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 5 );                                               \
+           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:420:19: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 5 );                                               \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:421:16: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 3 );                                               \
+                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:421:26: note: in definition of macro ‘HASH_JEN_MIX’
+   a -= b; a -= c; a ^= ( c >> 3 );                                               \
+                          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:422:8: note: in definition of macro ‘HASH_JEN_MIX’
+   b -= c; b -= a; b ^= ( a << 10 );                                              \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:423:3: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 15 );                                              \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:423:11: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 15 );                                              \
+           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:423:19: note: in definition of macro ‘HASH_JEN_MIX’
+   c -= a; c -= b; c ^= ( b >> 15 );                                              \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:360:18: note: in expansion of macro ‘HASH_JEN’
+ #define HASH_FCN HASH_JEN
+                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:200:15: error: request for member ‘hh’ in something not a structure or union
+          (add)->hh.hashv, _ha_bkt);                                              \
+               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:464:9: note: in definition of macro ‘HASH_JEN’
+   bkt = hashv & (num_bkts-1);                                                    \
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:624:3: note: in definition of macro ‘HASH_ADD_TO_BKT’
+  (addhh)->hh_next = head.hh_head;                                                \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:625:3: note: in definition of macro ‘HASH_ADD_TO_BKT’
+  (addhh)->hh_prev = NULL;                                                        \
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:626:49: note: in definition of macro ‘HASH_ADD_TO_BKT’
+  if (head.hh_head) { (head).hh_head->hh_prev = (addhh); }                        \
+                                                 ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:627:17: note: in definition of macro ‘HASH_ADD_TO_BKT’
+  (head).hh_head=addhh;                                                           \
+                 ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:629:10: note: in definition of macro ‘HASH_ADD_TO_BKT’
+      && (addhh)->tbl->noexpand != 1) {                                           \
+          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:82:34: note: in definition of macro ‘uthash_malloc’
+ #define uthash_malloc(sz) malloc(sz)      /* malloc fcn                      */
+                                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:630:8: note: in expansion of macro ‘HASH_EXPAND_BUCKETS’
+        HASH_EXPAND_BUCKETS((addhh)->tbl);                                        \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:686:17: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+             2 * tbl->num_buckets * sizeof(struct UT_hash_bucket));               \
+                 ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:687:5: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->ideal_chain_maxlen =                                                    \
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:688:9: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+        (tbl->num_items >> (tbl->log2_num_buckets+1)) +                           \
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:688:28: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+        (tbl->num_items >> (tbl->log2_num_buckets+1)) +                           \
+                            ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:689:10: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+        ((tbl->num_items & ((tbl->num_buckets*2)-1)) ? 1 : 0);                    \
+          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:689:29: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+        ((tbl->num_items & ((tbl->num_buckets*2)-1)) ? 1 : 0);                    \
+                             ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:690:5: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->nonideal_items = 0;                                                     \
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:691:36: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     for(_he_bkt_i = 0; _he_bkt_i < tbl->num_buckets; _he_bkt_i++)                \
+                                    ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:693:19: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+         _he_thh = tbl->buckets[ _he_bkt_i ].hh_head;                             \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:209:22: note: in definition of macro ‘HASH_TO_BKT’
+   bkt = ((hashv) & ((num_bkts) - 1));                                            \
+                      ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:630:8: note: in expansion of macro ‘HASH_EXPAND_BUCKETS’
+        HASH_EXPAND_BUCKETS((addhh)->tbl);                                        \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:698:40: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+            if (++(_he_newbkt->count) > tbl->ideal_chain_maxlen) {                \
+                                        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:699:14: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+              tbl->nonideal_items++;                                              \
+              ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:701:41: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+                                         tbl->ideal_chain_maxlen;                 \
+                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:85:34: note: in definition of macro ‘uthash_free’
+ #define uthash_free(ptr,sz) free(ptr)     /* free fcn                        */
+                                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:630:8: note: in expansion of macro ‘HASH_EXPAND_BUCKETS’
+        HASH_EXPAND_BUCKETS((addhh)->tbl);                                        \
+        ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:712:5: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->num_buckets *= 2;                                                       \
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:713:5: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->log2_num_buckets++;                                                     \
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:714:5: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->buckets = _he_new_buckets;                                              \
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:715:5: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->ineff_expands = (tbl->nonideal_items > (tbl->num_items >> 1)) ?         \
+     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:715:27: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->ineff_expands = (tbl->nonideal_items > (tbl->num_items >> 1)) ?         \
+                           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:715:50: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     tbl->ineff_expands = (tbl->nonideal_items > (tbl->num_items >> 1)) ?         \
+                                                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:716:10: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+         (tbl->ineff_expands+1) : 0;                                              \
+          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:717:9: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+     if (tbl->ineff_expands > 1) {                                                \
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:57: error: request for member ‘hh’ in something not a structure or union
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+                                                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:718:9: note: in definition of macro ‘HASH_EXPAND_BUCKETS’
+         tbl->noexpand=1;                                                         \
+         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:201:2: note: in expansion of macro ‘HASH_ADD_TO_BKT’
+  HASH_ADD_TO_BKT((head)->hh.tbl->buckets[_ha_bkt],&(add)->hh);                   \
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:170:9: note: in expansion of macro ‘HASH_ADD_KEYPTR’
+         HASH_ADD_KEYPTR(hh,head,&((add)->fieldname),keylen_in,add)
+         ^
+../src/proxy/proxy.c:229:9: note: in expansion of macro ‘HASH_ADD’
+         HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+         ^
+../src/proxy/proxy.c:231:24: error: request for member ‘p_s’ in something not a structure or union
+         if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
+                        ^
+../src/proxy/proxy.c:234:25: error: request for member ‘p_s’ in something not a structure or union
+         set_blocking(ret->p_s, 0);
+                         ^
+../src/proxy/proxy.c:237:26: error: request for member ‘p_s’ in something not a structure or union
+         if(setsockopt(ret->p_s, IPPROTO_TCP, TCP_NODELAY, (void*)&enable, sizeof(enable)) < 0)
+                          ^
+../src/proxy/proxy.c: In function ‘do_action_send’:
+../src/proxy/proxy.c:248:2: error: unknown type name ‘socket_pair’
+  socket_pair* ret;
+  ^
+In file included from ../src/proxy/../include/proxy/../dare/dare_server.h:22:0,
+                 from ../src/proxy/../include/proxy/proxy.h:10,
+                 from ../src/proxy/proxy.c:1:
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:612:14: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.keylen == keylen_in) {                                           \
+              ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:249:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:613:31: error: request for member ‘hh’ in something not a structure or union
+         if ((HASH_KEYCMP((out)->hh.key,keyptr,keylen_in)) == 0) break;             \
+                               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:604:37: note: in definition of macro ‘HASH_KEYCMP’
+ #define HASH_KEYCMP(a,b,len) memcmp(a,b,len)
+                                     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:249:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:14: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+              ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:249:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:70: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+                                                                      ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:58:25: note: in definition of macro ‘DECLTYPE_ASSIGN’
+   (dst) = DECLTYPE(dst)(src);                                                    \
+                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:48: note: in expansion of macro ‘ELMT_FROM_HH’
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+                                                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:249:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/proxy.c:254:20: error: request for member ‘p_s’ in something not a structure or union
+   int n = write(ret->p_s, data, data_size);
+                    ^
+../src/proxy/proxy.c: In function ‘do_action_close’:
+../src/proxy/proxy.c:265:2: error: unknown type name ‘socket_pair’
+  socket_pair* ret;
+  ^
+In file included from ../src/proxy/../include/proxy/../dare/dare_server.h:22:0,
+                 from ../src/proxy/../include/proxy/proxy.h:10,
+                 from ../src/proxy/proxy.c:1:
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:612:14: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.keylen == keylen_in) {                                           \
+              ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:266:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:613:31: error: request for member ‘hh’ in something not a structure or union
+         if ((HASH_KEYCMP((out)->hh.key,keyptr,keylen_in)) == 0) break;             \
+                               ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:604:37: note: in definition of macro ‘HASH_KEYCMP’
+ #define HASH_KEYCMP(a,b,len) memcmp(a,b,len)
+                                     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:266:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:14: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+              ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:266:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:70: error: request for member ‘hh’ in something not a structure or union
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+                                                                      ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:58:25: note: in definition of macro ‘DECLTYPE_ASSIGN’
+   (dst) = DECLTYPE(dst)(src);                                                    \
+                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:615:48: note: in expansion of macro ‘ELMT_FROM_HH’
+     if ((out)->hh.hh_next) DECLTYPE_ASSIGN(out,ELMT_FROM_HH(tbl,(out)->hh.hh_next)); \
+                                                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:110:8: note: in expansion of macro ‘HASH_FIND_IN_BKT’
+        HASH_FIND_IN_BKT((head)->hh.tbl, hh, (head)->hh.tbl->buckets[ _hf_bkt ],  \
+        ^
+../src/proxy/proxy.c:266:2: note: in expansion of macro ‘HASH_FIND’
+  HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+  ^
+../src/proxy/proxy.c:270:16: error: request for member ‘p_s’ in something not a structure or union
+   if (close(ret->p_s))
+                ^
+In file included from ../src/proxy/../include/proxy/../dare/dare_server.h:22:0,
+                 from ../src/proxy/../include/proxy/proxy.h:10,
+                 from ../src/proxy/proxy.c:1:
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:228:19: error: request for member ‘hh’ in something not a structure or union
+     if ( ((delptr)->hh.prev == NULL) && ((delptr)->hh.next == NULL) )  {         \
+                   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:228:50: error: request for member ‘hh’ in something not a structure or union
+     if ( ((delptr)->hh.prev == NULL) && ((delptr)->hh.next == NULL) )  {         \
+                                                  ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:235:32: error: request for member ‘hh’ in something not a structure or union
+         _hd_hh_del = &((delptr)->hh);                                            \
+                                ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:238:55: error: request for member ‘hh’ in something not a structure or union
+                 (UT_hash_handle*)((ptrdiff_t)((delptr)->hh.prev) +               \
+                                                       ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:241:21: error: request for member ‘hh’ in something not a structure or union
+         if ((delptr)->hh.prev) {                                                 \
+                     ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:242:52: error: request for member ‘hh’ in something not a structure or union
+             ((UT_hash_handle*)((ptrdiff_t)((delptr)->hh.prev) +                  \
+                                                    ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:243:59: error: request for member ‘hh’ in something not a structure or union
+                     (head)->hh.tbl->hho))->next = (delptr)->hh.next;             \
+                                                           ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:245:42: error: request for member ‘hh’ in something not a structure or union
+             DECLTYPE_ASSIGN(head,(delptr)->hh.next);                             \
+                                          ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:58:25: note: in definition of macro ‘DECLTYPE_ASSIGN’
+   (dst) = DECLTYPE(dst)(src);                                                    \
+                         ^
+../src/proxy/../include/proxy/../dare/../../../utils/uthash/uthash.h:280:5: note: in expansion of macro ‘HASH_DELETE’
+     HASH_DELETE(hh,head,delptr)
+     ^
+../src/proxy/proxy.c:272:3: note: in expansion of macro ‘HASH_DEL’
+   HASH_DEL(proxy->hash_map, ret);
+   ^
+In file included from ../src/proxy/../include/proxy/../dare/./dare_log.h:20:0,
+                 from ../src/proxy/../include/proxy/../dare/dare_server.h:19,
+                 from ../src/proxy/../include/proxy/proxy.h:10,
+                 from ../src/proxy/proxy.c:1:
+../src/proxy/proxy.c: At top level:
+../src/proxy/../include/proxy/../dare/././dare_config.h:48:1: warning: ‘equal_cid’ defined but not used [-Wunused-function]
+ equal_cid( dare_cid_t left_cid, dare_cid_t right_cid )
+ ^
+../src/proxy/../include/proxy/../dare/././dare_config.h:79:1: warning: ‘get_extended_group_size’ defined but not used [-Wunused-function]
+ get_extended_group_size( server_config_t config )
+ ^
+../src/proxy/../include/proxy/../dare/././dare_config.h:90:1: warning: ‘get_group_size’ defined but not used [-Wunused-function]
+ get_group_size( server_config_t config )
+ ^
+In file included from ../src/proxy/../include/proxy/../dare/dare_server.h:19:0,
+                 from ../src/proxy/../include/proxy/proxy.h:10,
+                 from ../src/proxy/proxy.c:1:
+../src/proxy/../include/proxy/../dare/./dare_log.h:116:1: warning: ‘log_new’ defined but not used [-Wunused-function]
+ log_new()
+ ^
+../src/proxy/../include/proxy/../dare/./dare_log.h:136:1: warning: ‘log_free’ defined but not used [-Wunused-function]
+ log_free( dare_log_t* log )
+ ^
+../src/proxy/../include/proxy/../dare/./dare_log.h:263:1: warning: ‘log_is_offset_larger’ defined but not used [-Wunused-function]
+ log_is_offset_larger( dare_log_t* log, 
+ ^
+../src/proxy/../include/proxy/../dare/./dare_log.h:333:1: warning: ‘log_entries_to_nc_buf’ defined but not used [-Wunused-function]
+ log_entries_to_nc_buf( dare_log_t* log, dare_nc_buf_t* nc_buf )
+ ^
+../src/proxy/../include/proxy/../dare/./dare_log.h:361:1: warning: ‘log_find_remote_end_offset’ defined but not used [-Wunused-function]
+ log_find_remote_end_offset( dare_log_t* log, dare_nc_buf_t* nc_buf )
+ ^
+../src/proxy/../include/proxy/../dare/./dare_log.h:460:1: warning: ‘log_append_entry’ defined but not used [-Wunused-function]
+ log_append_entry( dare_log_t* log,
+ ^
+../src/proxy/../include/proxy/../dare/./dare_log.h:522:1: warning: ‘log_append_csm_entry’ defined but not used [-Wunused-function]
+ log_append_csm_entry( dare_log_t* log,
+ ^
+make: *** [src/proxy/proxy.o] Error 1
