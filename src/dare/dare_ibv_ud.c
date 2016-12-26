@@ -1034,7 +1034,7 @@ handle_server_join_request( struct ibv_wc *wc, ud_hdr_t *request )
     ep->last_req_id = request->id;
     
     /* Append CONFIG entry */
-    ep->cid_idx = log_append_entry(SRV_DATA->log, 
+    ep->cid_idx = log_append_non_csm_entry(SRV_DATA->log, 
             SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->id, 
             wc->slid, CONFIG, &SRV_DATA->config.cid);
     //INFO_PRINT_LOG(log_fp, SRV_DATA->log);

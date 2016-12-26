@@ -457,7 +457,7 @@ log_get_tail( dare_log_t* log )
  * ! safe over RDMA
  */
 static uint64_t 
-log_append_entry( dare_log_t* log,
+log_append_non_csm_entry( dare_log_t* log,
                     uint64_t term, 
                     uint64_t req_id,
                     uint16_t clt_id,

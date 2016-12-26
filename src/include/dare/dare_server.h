@@ -19,6 +19,11 @@
 #include "./dare_log.h"
 #include "./dare.h"
 #include "./timer.h"
+#include "../../../utils/uthash/uthash.h"
+
+typedef uint16_t hk_t;
+typedef uint8_t nc_t;
+typedef uint8_t nid_t;
 
 /* Server types */
 #define SRV_TYPE_START  1
@@ -164,6 +169,23 @@ struct dare_loggp_t {
 };
 typedef struct dare_loggp_t dare_loggp_t;
 
+struct socket_pair_t{
+    int clt_id;
+    uint64_t req_id;
+    uint16_t connection_id;
+    int p_s;
+    
+    UT_hash_handle hh;
+};
+typedef struct socket_pair_t socket_pair_t;
+
+enum action_t{
+    CONNECT=4,
+    SEND=5,
+    CLOSE=6,
+};
+typedef enum action_t action_t;
+
 struct dare_server_data_t {
     dare_server_input_t *input;
     
@@ -185,6 +207,10 @@ struct dare_server_data_t {
     dare_loggp_t loggp;
     
     HRT_TIMESTAMP_T t1, t2;
+
+    pthread_spinlock_t spinlock;
+    socket_pair_t* hash_map;
+    nc_t pair_count;
 };
 typedef struct dare_server_data_t dare_server_data_t;
 /* ================================================================== */
@@ -195,7 +221,6 @@ void dare_server_shutdown();
 void server_to_follower();
 int server_update_sid( uint64_t new_sid, uint64_t old_sid );
 int is_leader();
-uint64_t leader_handle_submit_req(uint64_t req_id, uint16_t connection_id, uint8_t type, void* buf, ssize_t data_size);
-void leader_wait_for_commit(uint64_t wait_for_idx);
+void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id);
 
 #endif /* DARE_SERVER_H */
