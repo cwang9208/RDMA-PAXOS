@@ -40,7 +40,7 @@ typedef uint8_t nid_t;
 extern const double retry_exec_period;
 
 /* Heartbeat period in ms */
-extern const double hb_period;
+extern double hb_period;
 
 /**
  * The state identifier (SID)
@@ -157,6 +157,7 @@ struct dare_server_input_t {
     proxy_store_cmd_cb_t store_cmd;
     proxy_create_db_snapshot_cb_t create_db_snapshot;
     proxy_apply_db_snapshot_cb_t apply_db_snapshot;
+    char config_path[128];
     void* up_para;
 };
 typedef struct dare_server_input_t dare_server_input_t;

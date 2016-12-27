@@ -26,6 +26,8 @@
 #include "../include/dare/dare_ep_db.h"
 #include "../include/dare/timer.h"
 
+#include "../include/config-comp/config-dare.h"
+
 /* 
  * HB period (seconds)
  * election timeout range (microseconds)
@@ -34,14 +36,12 @@
  * log pruning period (seconds)
 */
 #ifdef DEBUG
-const double hb_period = 0.01;
 const uint64_t elec_timeout_low = 100000;
 const uint64_t elec_timeout_high = 300000;
 const double retransmit_period = 0.04;
 const double rc_info_period = 0.05;
 const double log_pruning_period = 0.05;
 #else
-const double hb_period = 0.001;
 const uint64_t elec_timeout_low = 10000;
 const uint64_t elec_timeout_high = 30000;
 const double rc_info_period = 0.01;
@@ -297,6 +297,7 @@ init_server_data()
     data.sm->up_para = data.input->up_para;
 
     /* Set up the configuration */
+    dare_read_config(data.input->config_path);
     data.config.idx = data.input->server_idx;
     data.config.len = MAX_SERVER_COUNT;
     if (data.config.len < data.input->group_size) {

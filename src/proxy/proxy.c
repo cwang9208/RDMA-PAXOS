@@ -15,10 +15,11 @@ static int set_blocking(int fd, int blocking);
 
 FILE *log_fp;
 
-int dare_main(proxy_node* proxy)
+int dare_main(proxy_node* proxy, const char* config_path)
 {
     int rc; 
     dare_server_input_t *input = (dare_server_input_t*)malloc(sizeof(dare_server_input_t));
+    memset(input, 0, sizeof(dare_server_input_t));
     input->log = stdout;
     input->name = "";
     input->output = "dare_servers.out";
@@ -37,6 +38,7 @@ int dare_main(proxy_node* proxy)
     input->store_cmd = stablestorage_save_request;
     input->create_db_snapshot = stablestorage_dump;
     input->apply_db_snapshot = stablestorage_load;
+    memcpy(input->config_path, config_path, strlen(config_path));
     input->up_para = proxy;
     static int srv_type = SRV_TYPE_START;
 
@@ -366,7 +368,7 @@ proxy_node* proxy_init(const char* config_path,const char* proxy_log_path)
 	
     proxy->inner_threads = NULL;
 
-	dare_main(proxy);
+	dare_main(proxy, config_path);
 
     return proxy;
 
