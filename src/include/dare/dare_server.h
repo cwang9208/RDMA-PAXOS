@@ -172,15 +172,14 @@ struct dare_loggp_t {
 };
 typedef struct dare_loggp_t dare_loggp_t;
 
-struct socket_pair_t{
+struct leader_socket_pair_t{
     int clt_id;
     uint64_t req_id;
     uint16_t connection_id;
-    int p_s;
     
     UT_hash_handle hh;
 };
-typedef struct socket_pair_t socket_pair_t;
+typedef struct leader_socket_pair_t leader_socket_pair_t;
 
 enum action_t{
     CONNECT=4,
@@ -212,7 +211,7 @@ struct dare_server_data_t {
     HRT_TIMESTAMP_T t1, t2;
 
     pthread_spinlock_t spinlock;
-    socket_pair_t* hash_map;
+    leader_socket_pair_t* hash_map;
     nc_t pair_count;
 };
 typedef struct dare_server_data_t dare_server_data_t;

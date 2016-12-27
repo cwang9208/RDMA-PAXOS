@@ -39,7 +39,7 @@ typedef void (*destroy_cb_t)(dare_sm_t *sm);
 /* Apply a command to the state machine */
 typedef int (*apply_cmd_cb_t)(dare_sm_t *sm, sm_cmd_t *cmd, sm_data_t *data);
 
-typedef void (*proxy_store_cmd_cb_t)(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
+typedef void (*proxy_store_cmd_cb_t)(void* data,void *arg);
 typedef void (*proxy_do_action_cb_t)(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
 typedef uint32_t (*proxy_create_db_snapshot_cb_t)(void *snapshot,void *arg);
 typedef int (*proxy_apply_db_snapshot_cb_t)(void *snapshot,uint32_t size,void *arg);

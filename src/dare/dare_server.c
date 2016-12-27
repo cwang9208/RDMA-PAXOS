@@ -1946,7 +1946,7 @@ apply_entry:
             //else {
             //    if (SID_GET_TERM(data.ctrl_data->sid) < 50) sleep(1);
             //}
-            data.sm->proxy_store_cmd(entry->clt_id, entry->type, entry->data.cmd.len, &entry->data.cmd.cmd, data.sm->up_para);
+            data.sm->proxy_store_cmd(&entry->clt_id, data.sm->up_para);
             if (!IS_LEADER)
                 data.sm->proxy_do_action(entry->clt_id, entry->type, entry->data.cmd.len, &entry->data.cmd.cmd, data.sm->up_para);
                 
@@ -2315,15 +2315,15 @@ static hk_t gen_key(nid_t node_id,nc_t node_count){
 void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id)
 {
 
-    socket_pair_t* pair = NULL;
+    leader_socket_pair_t* pair = NULL;
     uint64_t req_id;
     uint16_t connection_id;
 
     pthread_spin_lock(&data.spinlock);
     switch(type) {
         case CONNECT:
-            pair = (socket_pair_t*)malloc(sizeof(socket_pair_t));
-            memset(pair,0,sizeof(socket_pair_t));
+            pair = (leader_socket_pair_t*)malloc(sizeof(leader_socket_pair_t));
+            memset(pair,0,sizeof(leader_socket_pair_t));
             pair->clt_id = clt_id;
             pair->req_id = 0;
             pair->connection_id = gen_key(data.config.idx,data.pair_count++);
@@ -2339,7 +2339,7 @@ void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int cl
             req_id = ++pair->req_id;
             connection_id = pair->connection_id;
             
-            socket_pair_t* replaced_pair = NULL;
+            leader_socket_pair_t* replaced_pair = NULL;
             HASH_REPLACE_INT(data.hash_map, clt_id, pair, replaced_pair);
             break;
         case CLOSE:

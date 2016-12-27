@@ -2,15 +2,16 @@
 #include "../include/config-comp/config-proxy.h"
 #include <fcntl.h>
 #include <netinet/tcp.h>
+#include "../include/dare/dare_server.h"
 #define __STDC_FORMAT_MACROS
 
-static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg);
+static void stablestorage_save_request(void* data,void*arg);
 static uint32_t stablestorage_dump(void*buf,void*arg);
 static int stablestorage_load(void*buf,uint32_t size,void*arg);
 static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
-static void do_action_connect(uint16_t clt_id,size_t data_size,void* data,void* arg);
 static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg);
-static void do_action_close(uint16_t clt_id,size_t data_size,void* data,void* arg);
+static void do_action_connect(uint16_t clt_id,void* arg);
+static void do_action_close(uint16_t clt_id,void* arg);
 static int set_blocking(int fd, int blocking);
 
 FILE *log_fp;
@@ -147,34 +148,25 @@ void proxy_on_close(proxy_node* proxy, int fd)
 	return;
 }
 
-static void stablestorage_save_request(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void*arg)
+static void stablestorage_save_request(void* data,void*arg)
 {
     proxy_node* proxy = arg;
-    switch(type){
+    proxy_msg_header* header = (proxy_msg_header*)data;
+    switch(header->action){
         case CONNECT:
         {
-            proxy_connect_msg* co_msg = (proxy_connect_msg*)malloc(PROXY_CONNECT_MSG_SIZE);
-            co_msg->header.action = CONNECT;
-            co_msg->header.connection_id = clt_id;
-            store_record(proxy->db_ptr,PROXY_CONNECT_MSG_SIZE,co_msg);
+            store_record(proxy->db_ptr,PROXY_CONNECT_MSG_SIZE,data);
             break;
         }
         case SEND:
         {
-            proxy_send_msg* send_msg = (proxy_send_msg*)malloc(sizeof(proxy_send_msg)+data_size);
-            send_msg->header.action = SEND;
-            send_msg->header.connection_id = clt_id;
-            send_msg->data_size = data_size;
-            memcpy(send_msg->data,data,data_size);
-            store_record(proxy->db_ptr,PROXY_SEND_MSG_SIZE(send_msg),send_msg);
+            proxy_send_msg* send_msg = (proxy_send_msg*)data;
+            store_record(proxy->db_ptr,PROXY_SEND_MSG_SIZE(send_msg),data);
             break;
         }
         case CLOSE:
         {
-            proxy_close_msg* cl_msg = malloc(PROXY_CLOSE_MSG_SIZE);
-            cl_msg->header.action = CLOSE;
-            cl_msg->header.connection_id = clt_id;
-            store_record(proxy->db_ptr,PROXY_CLOSE_MSG_SIZE,cl_msg);
+            store_record(proxy->db_ptr,PROXY_CLOSE_MSG_SIZE,data);
             break;
         }
     }
@@ -189,30 +181,28 @@ static uint32_t stablestorage_dump(void*buf,void*arg)
 
 static int stablestorage_load(void*buf,uint32_t size,void*arg)
 {
-    proxy_msg_header* header = (proxy_msg_header*)buf;
-    size_t data_size = 0;
+    proxy_msg_header* header;
     uint32_t len = 0;
-    void* data = NULL;
     while(len < size) {
         header = (proxy_msg_header*)((char*)buf + len);
         switch(header->action){
             case SEND:
             {
                 proxy_send_msg* send_msg = (proxy_send_msg*)buf;
-                data_size = send_msg->data_size;;
-                data = send_msg->data;
                 len += PROXY_SEND_MSG_SIZE(send_msg);
+                do_action_send(header->connection_id, send_msg->data.cmd.len, send_msg->data.cmd.cmd ,arg);
             }
             case CONNECT:
             {
                 len += PROXY_CONNECT_MSG_SIZE;
+                do_action_connect(header->connection_id, arg);
             }
             case CLOSE:
             {
                 len += PROXY_CLOSE_MSG_SIZE;
+                do_action_close(header->connection_id, arg);
             }
         }
-        do_action_to_server(header->connection_id, header->action, data_size, data ,arg);
     }
     return 0;
 }
@@ -229,7 +219,7 @@ static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,vo
         	if(output!=NULL){
         		fprintf(output,"Operation: Connects.\n");
             }
-            do_action_connect(clt_id,data_size,data,arg);
+            do_action_connect(clt_id,arg);
             break;
         case SEND:
         	if(output!=NULL){
@@ -241,7 +231,7 @@ static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,vo
         	if(output!=NULL){
         		fprintf(output,"Operation: Closes.\n");
             }
-            do_action_close(clt_id,data_size,data,arg);
+            do_action_close(clt_id,arg);
             break;
         default:
             break;
@@ -249,16 +239,16 @@ static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,vo
     return;
 }
 
-static void do_action_connect(uint16_t clt_id,size_t data_size,void* data,void* arg)
+static void do_action_connect(uint16_t clt_id,void* arg)
 {
     proxy_node* proxy = arg;
 
-    socket_pair_t* ret;
+    follower_socket_pair_t* ret;
     HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
     if (NULL == ret)
     {
-        ret = malloc(sizeof(socket_pair_t));
-        memset(ret,0,sizeof(socket_pair_t));
+        ret = malloc(sizeof(follower_socket_pair_t));
+        memset(ret,0,sizeof(follower_socket_pair_t));
 
         ret->connection_id = clt_id;
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -287,7 +277,7 @@ do_action_connect_exit:
 static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg)
 {
 	proxy_node* proxy = arg;
-	socket_pair_t* ret;
+	follower_socket_pair_t* ret;
 	HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
 
 	if(NULL==ret){
@@ -301,10 +291,10 @@ do_action_send_exit:
 	return;
 }
 
-static void do_action_close(uint16_t clt_id,size_t data_size,void* data,void* arg)
+static void do_action_close(uint16_t clt_id,void* arg)
 {
 	proxy_node* proxy = arg;
-	socket_pair_t* ret;
+	follower_socket_pair_t* ret;
 	HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
 	if(NULL==ret){
 		goto do_action_close_exit;

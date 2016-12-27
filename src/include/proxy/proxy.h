@@ -3,11 +3,9 @@
 
 #include "../util/common-header.h"
 #include "../rsm-interface.h"
-
 #include "../../../utils/uthash/utlist.h"
-
+#include "../../../utils/uthash/uthash.h"
 #include "../db/db-interface.h"
-#include "../dare/dare_server.h"
 typedef struct inner_thread {
     pthread_t tid;
     struct inner_thread *next;
@@ -18,10 +16,19 @@ typedef struct proxy_address_t{
     size_t s_sock_len;
 }proxy_address;
 
+struct follower_socket_pair_t{
+    uint16_t connection_id;
+    int p_s;
+    
+    UT_hash_handle hh;
+};
+typedef struct follower_socket_pair_t follower_socket_pair_t;
+
+
 typedef struct proxy_node_t{
 	proxy_address sys_addr;
 
-    socket_pair_t* hash_map;
+    follower_socket_pair_t* hash_map;
 	inner_thread* inner_threads;
 	
     // log option
@@ -33,8 +40,8 @@ typedef struct proxy_node_t{
 }proxy_node;
 
 typedef struct proxy_msg_header_t{
-    action_t action;
     uint16_t connection_id;
+    uint8_t action;
 }proxy_msg_header;
 #define PROXY_MSG_HEADER_SIZE (sizeof(proxy_msg_header))
 
@@ -43,12 +50,30 @@ typedef struct proxy_connect_msg_t{
 }proxy_connect_msg;
 #define PROXY_CONNECT_MSG_SIZE (sizeof(proxy_connect_msg))
 
+struct fake_dare_cid_t {
+    uint64_t epoch;
+    uint8_t size[2];
+    uint8_t state;
+    uint8_t pad[1];
+    uint32_t bitmask;
+};
+typedef struct fake_dare_cid_t fake_dare_cid_t;
+
+struct fake_sm_cmd_t {
+    uint16_t    len;
+    uint8_t cmd[0];
+};
+typedef struct fake_sm_cmd_t fake_sm_cmd_t;
+
 typedef struct proxy_send_msg_t{
     proxy_msg_header header;
-    size_t data_size;
-    char data[0];
+    union {
+        fake_sm_cmd_t   cmd;
+        fake_dare_cid_t cid;
+        uint64_t head;
+    } data;
 }proxy_send_msg;
-#define PROXY_SEND_MSG_SIZE(M) (M->data_size+sizeof(proxy_send_msg))
+#define PROXY_SEND_MSG_SIZE(M) (M->data.cmd.len+sizeof(proxy_send_msg))
 
 typedef struct proxy_close_msg_t{
     proxy_msg_header header;
