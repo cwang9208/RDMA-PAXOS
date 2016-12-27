@@ -16,6 +16,8 @@ struct db_t{
     DB* bdb_ptr;
 };
 
+uint32_t records_len;
+
 db* initialize_db(const char* db_name,uint32_t flag){
     db* db_ptr=NULL;
     DB* b_db;
@@ -76,6 +78,8 @@ int store_record(db* db_p,size_t data_size,void* data){
     db_data.data = data;
     db_data.size = data_size;
 
+    records_len += data_size;
+
     memset(&key,0,sizeof(key));
     db_recno_t recno;
     key.data = &recno;
@@ -95,7 +99,7 @@ db_store_return:
     return ret;
 }
 
-uint32_t dump_records(db* db_p, void* buf){
+void dump_records(db* db_p, void* buf){
     DB* b_db = db_p->bdb_ptr;
     DBT key, data;
     DBC *dbcp;
@@ -125,6 +129,10 @@ uint32_t dump_records(db* db_p, void* buf){
     if ((ret = dbcp->c_close(dbcp)) != 0) {
         b_db->err(b_db, ret, "DBcursor->close");
     }
+}
 
-    return size;
+
+uint32_t get_records_len()
+{
+    return records_len;
 }

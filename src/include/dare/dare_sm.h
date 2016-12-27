@@ -41,7 +41,8 @@ typedef int (*apply_cmd_cb_t)(dare_sm_t *sm, sm_cmd_t *cmd, sm_data_t *data);
 
 typedef void (*proxy_store_cmd_cb_t)(void* data,void *arg);
 typedef void (*proxy_do_action_cb_t)(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
-typedef uint32_t (*proxy_create_db_snapshot_cb_t)(void *snapshot,void *arg);
+typedef void (*proxy_create_db_snapshot_cb_t)(void *snapshot,void *arg);
+typedef uint32_t (*proxy_get_db_size_cb_t)(void *arg);
 typedef int (*proxy_apply_db_snapshot_cb_t)(void *snapshot,uint32_t size,void *arg);
 
 struct dare_sm_t {
@@ -50,6 +51,7 @@ struct dare_sm_t {
 
     proxy_store_cmd_cb_t proxy_store_cmd;
     proxy_do_action_cb_t proxy_do_action;
+    proxy_get_db_size_cb_t proxy_get_db_size;
     proxy_create_db_snapshot_cb_t proxy_create_db_snapshot;
     proxy_apply_db_snapshot_cb_t proxy_apply_db_snapshot;
     void* up_para;

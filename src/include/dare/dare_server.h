@@ -161,6 +161,7 @@ struct dare_server_input_t {
     proxy_do_action_cb_t do_action;
     proxy_store_cmd_cb_t store_cmd;
     proxy_create_db_snapshot_cb_t create_db_snapshot;
+    proxy_get_db_size_cb_t get_db_size;
     proxy_apply_db_snapshot_cb_t apply_db_snapshot;
     char config_path[128];
     void* up_para;

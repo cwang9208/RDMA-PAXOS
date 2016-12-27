@@ -272,6 +272,7 @@ init_server_data()
     }
     data.sm->proxy_store_cmd = data.input->store_cmd;
     data.sm->proxy_do_action = data.input->do_action;
+    data.sm->proxy_get_db_size = data.input->get_db_size;
     data.sm->proxy_create_db_snapshot = data.input->create_db_snapshot;
     data.sm->proxy_apply_db_snapshot = data.input->apply_db_snapshot;
     data.sm->up_para = data.input->up_para;
@@ -616,7 +617,7 @@ poll_sm_requests()
         if (!(dare_state & SNAPSHOT)) {
             /* There is no snapshot */
             info(log_fp, "   # no snapshot\n");
-            uint32_t len = data.sm->proxy_create_db_snapshot(snapshot->data,data.sm->up_para);
+            uint32_t len = data.sm->proxy_get_db_size(data.sm->up_para);
             info(log_fp, "   # snapshot len = %"PRIu32"\n", len);
             if (len <= PREREG_SNAPSHOT_SIZE) {
                 info(log_fp, "   # pre-register snapshot\n");
@@ -636,6 +637,7 @@ poll_sm_requests()
                 }
                 reg_mem = 1;
             }
+            data.sm->proxy_create_db_snapshot(snapshot->data,data.sm->up_para);
             snapshot->len = len;
             snapshot->last_entry = last_applied_entry;
             
