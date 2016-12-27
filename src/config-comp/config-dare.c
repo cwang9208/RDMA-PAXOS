@@ -2,6 +2,7 @@
 #include "../include/dare/dare_server.h"
 #include <libconfig.h>
 
+double hb_period;
 
 int dare_read_config(const char* config_path){
     config_t config_file;
