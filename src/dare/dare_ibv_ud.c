@@ -78,7 +78,9 @@ static void
 handle_server_join_reply(struct ibv_wc *wc, reconf_rep_t *reply);
 
 static int
-wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc, union ibv_gid dest_gid);
+wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc, union ibv_gid dest_gid, uint16_t slid);
+static uint16_t
+get_unique_slid();
 
 static int
 mcast_ah_create();
@@ -940,6 +942,7 @@ int ud_join_cluster()
     request->id = req_id;
     request->gid = IBDEV->gid;
     request->type = JOIN;
+    request->slid = get_unique_slid();
 
     debug(log_fp, "# Sending JOIN request\n");
     return mcast_send_message(len);
@@ -964,10 +967,10 @@ handle_server_join_request( struct ibv_wc *wc, ud_hdr_t *request )
     empty = size;
     
     /* Find the ep that send this request; look in the EP DB */
-    dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, wc->slid);
+    dare_ep_t *ep = ep_search(&SRV_DATA->endpoints, request->slid);
     if (ep == NULL) {
         /* No ep with this LID; create a new one */
-        ep = ep_insert(&SRV_DATA->endpoints, wc->slid, request->gid);
+        ep = ep_insert(&SRV_DATA->endpoints, request->slid, request->gid);
     }
     ep->ud_ep.qpn = wc->src_qp;
 
@@ -1021,7 +1024,7 @@ handle_server_join_request( struct ibv_wc *wc, ud_hdr_t *request )
     /* Initialize the new server */
     server_t *new_server = &SRV_DATA->config.servers[empty];
     ib_ep = (dare_ib_ep_t*)new_server->ep;
-    wc_to_ud_ep(&ib_ep->ud_ep, wc, request->gid);
+    wc_to_ud_ep(&ib_ep->ud_ep, wc, request->gid, request->slid);
     ib_ep->rc_connected = 0;
     new_server->fail_count = 0;
     new_server->next_lr_step = LR_GET_WRITE;
@@ -1036,7 +1039,7 @@ handle_server_join_request( struct ibv_wc *wc, ud_hdr_t *request )
     /* Append CONFIG entry */
     ep->cid_idx = log_append_non_csm_entry(SRV_DATA->log, 
             SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->id, 
-            wc->slid, CONFIG, &SRV_DATA->config.cid);
+            request->slid, CONFIG, &SRV_DATA->config.cid);
     //INFO_PRINT_LOG(log_fp, SRV_DATA->log);
     info_wtime(log_fp, "Adding CONFIG entry to idx=%"PRIu64"\n", ep->cid_idx);
     
@@ -1097,7 +1100,8 @@ int ud_exchange_rc_info()
     request->ctrl_rm.raddr = (uint64_t)SRV_DATA->ctrl_data;
     request->ctrl_rm.rkey  = IBDEV->lcl_mr[CTRL_QP]->rkey;
     request->mtu           = IBDEV->mtu;
-    request->gid           = IBDEV->gid;
+    request->hdr.gid       = IBDEV->gid;
+    request->hdr.slid      = get_unique_slid();
     request->idx           = SRV_DATA->config.idx;
 
 //info(log_fp, "RC SYN: LOG MR=[%"PRIu64"; %"PRIu32"]; LOG MR=[%"PRIu64"; %"PRIu32"]\n",
@@ -1163,7 +1167,7 @@ handle_rc_syn(struct ibv_wc *wc, rc_syn_t *msg)
     ep = (dare_ib_ep_t*)SRV_DATA->config.servers[msg->idx].ep;
     if (0 == ep->rc_connected) {
         /* Create UD endpoint from WC */
-        wc_to_ud_ep(&ep->ud_ep, wc, msg->gid);
+        wc_to_ud_ep(&ep->ud_ep, wc, msg->hdr.gid, msg->hdr.slid);
         text(log_fp, "New SYN msg from server %"PRIu8" with lid=%"PRIu16"\n", 
                 msg->idx, ep->ud_ep.lid);
         
@@ -1226,7 +1230,8 @@ handle_rc_syn(struct ibv_wc *wc, rc_syn_t *msg)
     reply->ctrl_rm.raddr = (uint64_t)SRV_DATA->ctrl_data;
     reply->ctrl_rm.rkey  = IBDEV->lcl_mr[CTRL_QP]->rkey;
     reply->mtu           = IBDEV->mtu;
-    reply->gid           = IBDEV->gid;
+    reply->hdr.gid       = IBDEV->gid;
+    reply->hdr.slid      = get_unique_slid();
     reply->idx           = SRV_DATA->config.idx;
     reply->size          = 1;
     qpns[0] = ep->rc_ep.rc_qp[LOG_QP].qp->qp_num;
@@ -1261,7 +1266,7 @@ handle_rc_synack(struct ibv_wc *wc, rc_syn_t *msg)
     ep = (dare_ib_ep_t*)SRV_DATA->config.servers[msg->idx].ep;
     if (0 == ep->rc_connected) {
         /* Create UD endpoint from WC */
-        wc_to_ud_ep(&ep->ud_ep, wc, msg->gid);
+        wc_to_ud_ep(&ep->ud_ep, wc, msg->hdr.gid, msg->hdr.slid);
         debug(log_fp, "NEW SYNACK msg from server %"PRIu8" with lid=%"PRIu16"\n", 
                 msg->idx, ep->ud_ep.lid);
 
@@ -1479,20 +1484,29 @@ int ud_send_clt_reply( uint16_t lid, uint64_t req_id, uint8_t type )
 /* ================================================================== */
 
 static int
-wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc, union ibv_gid dest_gid)
+wc_to_ud_ep(ud_ep_t *ud_ep, struct ibv_wc *wc, union ibv_gid dest_gid, uint16_t slid)
 {
-    ud_ep->lid = wc->slid;
+    ud_ep->lid = slid;
     ud_ep->gid = dest_gid;
     /* Create new AH for this LID */
     if (NULL != ud_ep->ah) {
         /* AH already created - destroy to be on the safe side */
         ud_ah_destroy(ud_ep->ah);
     }
-    ud_ep->ah = ud_ah_create(ud_ep->lid, ud_ep->gid);
+    ud_ep->ah = ud_ah_create(wc->slid, ud_ep->gid);
     if (NULL == ud_ep->ah) {
         error_return(1, log_fp, "Cannot create AH for LID %"PRIu16"\n", 
                      ud_ep->lid);
     }
     ud_ep->qpn = wc->src_qp;
     return 0;
+}
+
+static uint16_t
+get_unique_slid()
+{
+    char name[65];
+    gethostname(name, sizeof(name));
+    uint16_t lid = name[21] - '0';
+    return lid;
 }

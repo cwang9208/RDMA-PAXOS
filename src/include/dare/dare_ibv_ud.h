@@ -30,6 +30,7 @@ struct ud_hdr_t {
     uint8_t type;
     union ibv_gid gid;
     //uint8_t pad[7];
+    uint16_t slid;
 };
 typedef struct ud_hdr_t ud_hdr_t;
 
@@ -65,7 +66,7 @@ struct rc_syn_t {
     rem_mem_t log_rm;
     rem_mem_t ctrl_rm;
     enum ibv_mtu mtu;
-    union ibv_gid gid;
+    //union ibv_gid gid;
     uint8_t idx;
     uint8_t size;
     uint8_t data[0];    // log & ctrl QPNs
