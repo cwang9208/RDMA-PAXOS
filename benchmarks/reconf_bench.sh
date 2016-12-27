@@ -43,7 +43,8 @@ StartDare() {
 }
 
 StopDare() {
-    for srv in "${!pids[@]}"; do
+    for srv in "${!pids[@]}"; do 
+        #${!pids[@]}: expand to the list of array indices (keys) assigned in pids
         cmd=( "ssh" "$USER@$srv" "kill -2" "${pids[$srv]}" )
         echo "Executing: ${cmd[@]}"
         $("${cmd[@]}")
@@ -251,6 +252,30 @@ FailLeader() {
     if [[ "x$1" == "xstop" ]]; then
         Stop
     fi  
+}
+
+RecoverServer() {
+    echo -e "Adding a server..."
+    AddServer
+    echo "done"
+
+    sleep 0.5
+    
+    if [[ "x$1" == "xstop" ]]; then
+        Stop
+    fi
+}
+
+Upsize() {
+    echo -e "Adding a server (upsize)..."
+    AddServer
+    echo "done"
+
+    sleep 0.3
+    
+    if [[ "x$1" == "xstop" ]]; then
+        Stop
+    fi
 }
 
 FailServer() {
