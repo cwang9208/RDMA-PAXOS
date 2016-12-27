@@ -28,26 +28,6 @@
 
 #include "../include/config-comp/config-dare.h"
 
-/* 
- * HB period (seconds)
- * election timeout range (microseconds)
- * retransmission period (seconds)
- * period of checking for new connections (seconds)
- * log pruning period (seconds)
-*/
-#ifdef DEBUG
-const uint64_t elec_timeout_low = 100000;
-const uint64_t elec_timeout_high = 300000;
-const double retransmit_period = 0.04;
-const double rc_info_period = 0.05;
-const double log_pruning_period = 0.05;
-#else
-const uint64_t elec_timeout_low = 10000;
-const uint64_t elec_timeout_high = 30000;
-const double rc_info_period = 0.01;
-const double retransmit_period = 0.02;
-const double log_pruning_period = 0.03;
-#endif
 /* Retry period before failures (seconds) */
 const double retry_exec_period = 0.355;
 

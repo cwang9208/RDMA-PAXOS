@@ -41,6 +41,11 @@ extern const double retry_exec_period;
 
 /* Heartbeat period in ms */
 extern double hb_period;
+extern uint64_t elec_timeout_low;
+extern uint64_t elec_timeout_high;
+extern double rc_info_period;
+extern double retransmit_period;
+extern double log_pruning_period;
 
 /**
  * The state identifier (SID)
@@ -180,13 +185,6 @@ struct leader_socket_pair_t{
     UT_hash_handle hh;
 };
 typedef struct leader_socket_pair_t leader_socket_pair_t;
-
-enum action_t{
-    CONNECT=4,
-    SEND=5,
-    CLOSE=6,
-};
-typedef enum action_t action_t;
 
 struct dare_server_data_t {
     dare_server_input_t *input;

@@ -24,6 +24,10 @@
 #define CONFIG  2
 #define HEAD    3
 
+#define CONNECT 4
+#define SEND    5
+#define CLOSE   6
+
 extern int prev_log_entry_head;
 
 /* Entry types: <CSM, cmd> 

@@ -3,6 +3,11 @@
 #include <libconfig.h>
 
 double hb_period;
+uint64_t elec_timeout_low;
+uint64_t elec_timeout_high;
+double rc_info_period;
+double retransmit_period;
+double log_pruning_period;
 
 int dare_read_config(const char* config_path){
     config_t config_file;
@@ -16,9 +21,25 @@ int dare_read_config(const char* config_path){
     dare_global_config = config_lookup(&config_file,"dare_global_config");
 
     if(NULL!=dare_global_config){
-        double temp;
-        if(config_setting_lookup_float(dare_global_config,"hb_period",&temp)){
-            hb_period = temp;
+        double temp_float;
+        if(config_setting_lookup_float(dare_global_config,"hb_period",&temp_float)){
+            hb_period = temp_float;
+        }
+        if(config_setting_lookup_float(dare_global_config,"rc_info_period",&temp_float)){
+            rc_info_period = temp_float;
+        }
+        if(config_setting_lookup_float(dare_global_config,"retransmit_period",&temp_float)){
+            retransmit_period = temp_float;
+        }
+        if(config_setting_lookup_float(dare_global_config,"log_pruning_period",&temp_float)){
+            log_pruning_period = temp_float;
+        }
+        long long temp_int64;
+        if(config_setting_lookup_int64(dare_global_config,"elec_timeout_low",&temp_int64)){
+            elec_timeout_low = temp_int64;
+        }
+        if(config_setting_lookup_int64(dare_global_config,"elec_timeout_high",&temp_int64)){
+            elec_timeout_high = temp_int64;
         }
     }
 
