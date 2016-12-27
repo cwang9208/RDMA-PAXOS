@@ -222,7 +222,7 @@ Stop() {
 
 Start() {
     echo -e "Starting $group_size servers..."
-    StartDare $server_count
+    StartDare
     echo "done"
 
     sleep 2
