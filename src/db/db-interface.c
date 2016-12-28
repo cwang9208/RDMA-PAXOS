@@ -81,14 +81,10 @@ int store_record(db* db_p,size_t data_size,void* data){
     records_len += data_size;
 
     memset(&key,0,sizeof(key));
-    db_recno_t recno;
-    key.data = &recno;
-    key.ulen = sizeof(recno);
-    key.flags = DB_DBT_USERMEM;
+    key.flags = DB_DBT_MALLOC;
     if ((ret=b_db->put(b_db,NULL,&key,&db_data,DB_AUTO_COMMIT|DB_APPEND))==0){
         //debug_log("db : %ld record stored. \n",*(uint64_t*)key_data);
         //b_db->sync(b_db,0);
-        //debug_log("new record number is %lu\n", (u_long)recno);
     }
     else{
         err_log("DB : %s.\n",db_strerror(ret));
@@ -105,7 +101,7 @@ void dump_records(db* db_p, void* buf){
     DBC *dbcp;
     int ret;
 
-    uint32_t size = 0;
+    uint32_t len = 0;
 
     /* Acquire a cursor for the database. */
     if ((ret = b_db->cursor(b_db, NULL, &dbcp, 0)) != 0) {
@@ -119,8 +115,8 @@ void dump_records(db* db_p, void* buf){
     /* Walk through the database and print out the key/data pairs. */
     while ((ret = dbcp->c_get(dbcp, &key, &data, DB_NEXT)) == 0) {
         //debug_log("%lu : %.*s\n", *(u_long *)key.data, (int)data.size, (char *)data.data);
-        memcpy((char*)buf+size, data.data, data.size);
-        size += data.size;
+        memcpy((char*)buf+len, data.data, data.size);
+        len += data.size;
     }
     if (ret != DB_NOTFOUND)
         b_db->err(b_db, ret, "DBcursor->get");
