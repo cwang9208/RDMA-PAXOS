@@ -41,7 +41,7 @@ ForceAbsolutePath () {
 StartDare() {
     for ((i=0; i<${group_size}; ++i)); do
         srv=${servers[$i]}
-        config_dare=( "server_type=start" "server_idx=$i" "group_size=$group_size" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}_1.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so")
+        config_dare=( "server_type=start" "server_idx=$i" "group_size=$group_size" "config_path=${DAREDIR}/target/nodes.local.cfg" "dare_log_file=$PWD/srv${i}_1.log" "mgid=$DGID" "LD_PRELOAD=${DAREDIR}/target/interpose.so" )
         cmd=( "ssh" "$USER@${servers[$i]}" "${config_dare[@]}" "nohup" "${run_dare}" "${redirection[@]}" "&" "echo \$!" )
         pids[$srv]=$("${cmd[@]}")
         rounds[$srv]=2
