@@ -15,12 +15,12 @@ usage () {
 
 timer_start () {
 	echo "$1"
-	t1=$(date +%s)
+	t1=$(date +%s%N)
 }
 
 timer_stop () {
-	t2=$(date +%s)
-	echo "done ($(expr $t2 - $t1) seconds)"
+	t2=$(date +%s%N)
+	echo "done ($(expr $t2 - $t1) nanoseconds)"
 }
 
 ErrorAndExit () {
@@ -275,7 +275,7 @@ FailLeader() {
     echo "done"
 
     sleep 1
-    timer_start "looking for leader"
+    timer_start "Finding the leader..."
     FindLeader
     timer_stop
     
