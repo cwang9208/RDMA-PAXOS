@@ -18,7 +18,6 @@
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include "common-structure.h"
 #include "debug.h"
 
 #endif
