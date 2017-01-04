@@ -7,6 +7,8 @@ Script for starting DARE
 usage  : $0 [options]
 options: --app                # app to run
          [--scount=INT]       # server count [default 3]
+         [--ccount=INT]       # client count [default 1]
+         [--rcount=INT]       # request count [default 10000]
 EOF
 
 usage () {
