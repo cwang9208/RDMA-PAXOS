@@ -189,6 +189,7 @@ static void stablestorage_dump_records(void*buf,void*arg)
 
 static int stablestorage_load_records(void*buf,uint32_t size,void*arg)
 {
+    proxy_node* proxy = arg;
     proxy_msg_header* header;
     uint32_t len = 0;
     while(len < size) {
@@ -198,18 +199,21 @@ static int stablestorage_load_records(void*buf,uint32_t size,void*arg)
             {
                 proxy_send_msg* send_msg = (proxy_send_msg*)header;
                 len += PROXY_SEND_MSG_SIZE(send_msg);
+                store_record(proxy->db_ptr,PROXY_SEND_MSG_SIZE(send_msg),header);
                 do_action_send(header->connection_id, send_msg->data.cmd.len, send_msg->data.cmd.cmd, arg);
                 break;
             }
             case CONNECT:
             {
                 len += PROXY_CONNECT_MSG_SIZE;
+                store_record(proxy->db_ptr,PROXY_CONNECT_MSG_SIZE,header);
                 do_action_connect(header->connection_id, arg);
                 break;
             }
             case CLOSE:
             {
                 len += PROXY_CLOSE_MSG_SIZE;
+                store_record(proxy->db_ptr,PROXY_CLOSE_MSG_SIZE,header);
                 do_action_close(header->connection_id, arg);
                 break;
             }
