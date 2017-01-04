@@ -47,7 +47,7 @@ StartDare() {
         rounds[$srv]=2
         #echo "StartDare COMMAND: "${cmd[@]}
         echo -e "\tp$i ($srv) -- pid=${pids[$srv]}"
-	# echo -e enable interpretation of backslash escapes
+        #echo -e enable interpretation of backslash escapes
     done
     #echo -e "\n\tinitial servers: ${!servers[]}${!pids[@]}"
     #echo -e "\t...and their PIDs: ${pids[@]}"
