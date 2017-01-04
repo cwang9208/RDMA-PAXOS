@@ -76,7 +76,7 @@ StartBenchmark() {
         run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-t set,get" "-h $leader" "-p $port" "-n $request_count" "-c $client_count")
     fi
     
-    cmd=( "ssh" "$USER@${client}" "${run_loop[@]}" ">" "benchmark_out.txt")
+    cmd=( "ssh" "$USER@${client}" "${run_loop[@]}" ">" "clt.log")
     $("${cmd[@]}")
 }
 
