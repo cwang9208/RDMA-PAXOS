@@ -68,7 +68,6 @@ FindLeader() {
 
 port=8888
 StartBenchmark() {
-    FindLeader
     if [[ "$APP" == "ssdb" ]]; then
         run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" "$port" "$request_count" "$client_count")
     elif [[ "$APP" == "redis" ]]; then
@@ -152,7 +151,7 @@ echo "done"
 
 sleep 10
 #note: wait for leader election
-
+FindLeader
 StartBenchmark
 
 sleep 0.2

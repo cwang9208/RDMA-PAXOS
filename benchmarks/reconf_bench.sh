@@ -13,6 +13,16 @@ usage () {
     echo -e "$HELP"
 }
 
+timer_start () {
+	echo "$1"
+	t1=$(date +%s)
+}
+
+timer_stop () {
+	t2=$(date +%s)
+	echo "done ($(expr $t2 - $t1) seconds)"
+}
+
 ErrorAndExit () {
   echo "ERROR: $1"
   exit 1
@@ -164,9 +174,21 @@ AddServer() {
 }
 
 port=8888
+StartBenchmark() {
+    if [[ "$APP" == "ssdb" ]]; then
+        run_loop=( "${DAREDIR}/apps/ssdb/ssdb-master/tools/ssdb-bench" "$leader" "$port" "$request_count" "$client_count")
+    elif [[ "$APP" == "redis" ]]; then
+        run_loop=( "${DAREDIR}/apps/redis/install/bin/redis-benchmark" "-t set,get" "-h $leader" "-p $port" "-n $request_count" "-c $client_count")
+    fi
+    rounds[$client]=$((rounds[$client] + 1))
+    cmd=( "ssh" "$USER@${client}" "${run_loop[@]}" ">" "clt_${rounds[$client]}.log")
+    $("${cmd[@]}")
+}
 
 DAREDIR=$PWD/..
 APP=""
+client_count=1
+request_count=10000
 for arg in "$@"
 do
     case ${arg} in
@@ -194,7 +216,7 @@ elif [[ "$APP" == "redis" ]]; then
 fi
 
 # list of allocated nodes, e.g., nodes=(n112002 n112001 n111902)
-nodes=(10.22.1.1 10.22.1.2 10.22.1.3 10.22.1.4 10.22.1.5 10.22.1.6 10.22.1.7 10.22.1.8 10.22.1.9)
+nodes=(10.22.1.1 10.22.1.2 10.22.1.3 10.22.1.4 10.22.1.5 10.22.1.6 10.22.1.7 10.22.1.8 10.22.1.9 202.45.128.159)
 node_count=${#nodes[@]}
 
 echo "Allocated ${node_count} nodes:" > nodes
@@ -202,6 +224,9 @@ for ((i=0; i<${node_count}; ++i)); do
     echo "$i:${nodes[$i]}" >> nodes
 done
 group_size=5
+
+client=${nodes[-2]}
+echo ">>> client: ${client}"
 
 for ((i=0; i<$node_count; ++i)); do
     servers[${i}]=${nodes[$i]}
@@ -228,6 +253,8 @@ Start() {
     sleep 2
 
     sleep 0.5
+    FindLeader
+    StartBenchmark
     
     if [[ "x$1" == "xstop" ]]; then
         Stop
@@ -248,6 +275,11 @@ FailLeader() {
     echo "done"
 
     sleep 1
+    timer_start "looking for leader"
+    FindLeader
+    timer_stop
+    
+    StartBenchmark
     
     if [[ "x$1" == "xstop" ]]; then
         Stop
@@ -260,6 +292,7 @@ RecoverServer() {
     echo "done"
 
     sleep 0.5
+    StartBenchmark
     
     if [[ "x$1" == "xstop" ]]; then
         Stop
@@ -272,6 +305,7 @@ Upsize() {
     echo "done"
 
     sleep 0.3
+    StartBenchmark
     
     if [[ "x$1" == "xstop" ]]; then
         Stop
@@ -284,6 +318,7 @@ FailServer() {
     echo "done"
 
     sleep 0.7
+    StartBenchmark
     
     if [[ "x$1" == "xstop" ]]; then
         Stop
