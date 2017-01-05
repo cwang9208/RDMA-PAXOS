@@ -7,8 +7,8 @@ Build DARE
 ----------
 Prerequisites
  - libev
- - libconfig (sudo apt-get install libconfig-dev)
- - libdb (sudo apt-get install libdb-dev)
+ - libconfig
+ - libdb
  - libibverbs
 
 0. Commands to checkout a brand-new project:
