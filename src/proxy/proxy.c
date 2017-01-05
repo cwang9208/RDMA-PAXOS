@@ -74,30 +74,85 @@ int dare_main(proxy_node* proxy, const char* config_path)
         return 1;
     }
 
-    inner_thread *elt = (inner_thread*)malloc(sizeof(inner_thread));
-    elt->tid = dare_thread;
-    LL_APPEND(proxy->inner_threads,elt);
-    
+    list_entry_t *n1 = malloc(sizeof(list_entry_t));
+    LIST_INSERT_HEAD(&listhead, n1, entries);
     //fclose(log_fp);
     
     return 0;
 }
 
-static int tidcmp(inner_thread *a, inner_thread *b) {
-    return (a->tid == b->tid) ? 0 : 1;
-}
-
-static int is_inner(inner_thread* head, pthread_t tid)
+static int is_inner(pthread_t tid)
 {
-	inner_thread *elt, etmp;
-	etmp.tid = tid;
-	LL_SEARCH(head,elt,&etmp,tidcmp);
-
-	if (elt)
-		return 1;
-	else
-		return 0;
+    list_entry_t *np;
+    LIST_FOREACH(np, &listhead, entries) {
+        if (np->tid == tid)
+            return 1;
+    }
+    return 0;
 }
+
+static hk_t gen_key(nid_t node_id,nc_t node_count){
+    hk_t key = 0;
+    key |= ((hk_t)node_id<<8);
+    key |= (hk_t)node_count;
+    return key;
+}
+
+static void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id, proxy_node* proxy)
+{
+    socket_pair* pair = NULL;
+    uint64_t req_id;
+    uint16_t connection_id;
+
+    pthread_spin_lock(&tailq_lock);
+    switch(type) {
+        case CONNECT:
+            pair = (socket_pair*)malloc(sizeof(socket_pair));
+            memset(pair,0,sizeof(socket_pair));
+            pair->clt_id = clt_id;
+            pair->req_id = 0;
+            nid_t node_id = get_node_id();
+            pair->connection_id = gen_key(node_id, proxy->pair_count++);
+            
+            req_id = ++pair->req_id;
+            connection_id = pair->connection_id;
+            
+            HASH_ADD_INT(proxy->leader_hash_map, clt_id, pair);
+            break;
+        case SEND:
+            HASH_FIND_INT(proxy->leader_hash_map, &clt_id, pair);
+            
+            req_id = ++pair->req_id;
+            connection_id = pair->connection_id;
+            
+            socket_pair* replaced_pair = NULL;
+            HASH_REPLACE_INT(proxy->leader_hash_map, clt_id, pair, replaced_pair);
+            break;
+        case CLOSE:
+            HASH_FIND_INT(proxy->leader_hash_map, &clt_id, pair);
+            
+            req_id = ++pair->req_id;
+            connection_id = pair->connection_id;
+            
+            HASH_DEL(proxy->leader_hash_map, pair);
+            break;
+    }
+
+    tailq_entry_t* n2;
+    n2 = malloc(sizeof(tailq_entry_t));
+    n2->req_id = req_id;
+    n2->connection_id = connection_id;
+    n2->type = type;
+    n2->data_size = data_size;
+    if (data_size)
+        memcpy(n2->data, buf, data_size);
+    TAILQ_INSERT_TAIL(&tailhead, n2, entries);
+
+    pthread_spin_unlock(&tailq_lock);
+
+    //while (wait_for_idx > data.last_cmt_write_csm_idx);
+}
+
 
 static int set_blocking(int fd, int blocking) {
     int flags;
@@ -119,33 +174,33 @@ static int set_blocking(int fd, int blocking) {
 
 void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 {
-	if (is_inner(proxy->inner_threads, pthread_self()))
+	if (is_inner(pthread_self()))
 		return;
 
 	if (is_leader())
-        leader_handle_submit_req(SEND, bytes_read, buf, fd);
+        leader_handle_submit_req(SEND, bytes_read, buf, fd, proxy);
 
 	return;
 }
 
 void proxy_on_accept(proxy_node* proxy, int fd)
 {
-	if (is_inner(proxy->inner_threads, pthread_self()))
+	if (is_inner(pthread_self()))
 		return;
 
 	if (is_leader())
-        leader_handle_submit_req(CONNECT, 0, NULL, fd);
+        leader_handle_submit_req(CONNECT, 0, NULL, fd, proxy);
 
 	return;	
 }
 
 void proxy_on_close(proxy_node* proxy, int fd)
 {
-	if (is_inner(proxy->inner_threads, pthread_self()))
+	if (is_inner(pthread_self()))
 		return;
 
 	if (is_leader())
-        leader_handle_submit_req(CLOSE, 0, NULL, fd);
+        leader_handle_submit_req(CLOSE, 0, NULL, fd, proxy);
 
 	return;
 }
@@ -258,12 +313,12 @@ static void do_action_connect(uint16_t clt_id,void* arg)
 {
     proxy_node* proxy = arg;
 
-    follower_socket_pair_t* ret;
-    HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+    socket_pair* ret;
+    HASH_FIND(hh, proxy->follower_hash_map, &clt_id, sizeof(uint16_t), ret);
     if (NULL == ret)
     {
-        ret = malloc(sizeof(follower_socket_pair_t));
-        memset(ret,0,sizeof(follower_socket_pair_t));
+        ret = malloc(sizeof(socket_pair));
+        memset(ret,0,sizeof(socket_pair));
 
         ret->connection_id = clt_id;
         int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -273,7 +328,7 @@ static void do_action_connect(uint16_t clt_id,void* arg)
             goto do_action_connect_exit;
         }
         ret->p_s = sockfd;
-        HASH_ADD(hh, proxy->hash_map, connection_id, sizeof(uint16_t), ret);
+        HASH_ADD(hh, proxy->follower_hash_map, connection_id, sizeof(uint16_t), ret);
 
         if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
             fprintf(stderr, "ERROR connecting!\n");
@@ -292,8 +347,8 @@ do_action_connect_exit:
 static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg)
 {
 	proxy_node* proxy = arg;
-	follower_socket_pair_t* ret;
-	HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+	socket_pair* ret;
+	HASH_FIND(hh, proxy->follower_hash_map, &clt_id, sizeof(uint16_t), ret);
 
 	if(NULL==ret){
 		goto do_action_send_exit;
@@ -309,14 +364,14 @@ do_action_send_exit:
 static void do_action_close(uint16_t clt_id,void* arg)
 {
 	proxy_node* proxy = arg;
-	follower_socket_pair_t* ret;
-	HASH_FIND(hh, proxy->hash_map, &clt_id, sizeof(uint16_t), ret);
+	socket_pair* ret;
+	HASH_FIND(hh, proxy->follower_hash_map, &clt_id, sizeof(uint16_t), ret);
 	if(NULL==ret){
 		goto do_action_close_exit;
 	}else{
 		if (close(ret->p_s))
 			fprintf(stderr, "ERROR closing socket!\n");
-		HASH_DEL(proxy->hash_map, ret);
+		HASH_DEL(proxy->follower_hash_map, ret);
 	}
 do_action_close_exit:
 	return;
@@ -367,11 +422,17 @@ proxy_node* proxy_init(const char* config_path,const char* proxy_log_path)
         //}
     }
 
+    TAILQ_INIT(&tailhead);
+    LIST_INIT(&listhead);
+
 	proxy->db_ptr = initialize_db(proxy->db_name,0);
 
-	proxy->hash_map = NULL;
-	
-    proxy->inner_threads = NULL;
+	proxy->follower_hash_map = NULL;
+    proxy->leader_hash_map = NULL;
+
+    if(pthread_spin_init(&tailq_lock, PTHREAD_PROCESS_PRIVATE)){
+        err_log("PROXY: Cannot init the lock\n");
+    }
 
 	dare_main(proxy, config_path);
 

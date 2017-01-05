@@ -327,6 +327,11 @@ free_ib_device()
 /* Starting a server */
 #if 1
 
+void dare_ib_poll_tailq()
+{
+    return get_tailq_message();
+}
+
 /**
  * Poll UD CQ and retrieve the first message
  */

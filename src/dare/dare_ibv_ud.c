@@ -771,6 +771,25 @@ mcast_send_message( uint32_t len )
     return 0;
 }
 
+void get_tailq_message()
+{
+    tailq_entry_t* n2;
+    pthread_spin_lock(&tailq_lock);
+    while (!TAILQ_EMPTY(&tailhead)) {
+            n2 = TAILQ_FIRST(&tailhead);
+            sm_cmd_t* cmd = malloc(sizeof(sm_cmd_t) + n2->data_size);
+            cmd->len = n2->data_size;
+            if (cmd->len)
+                memcpy(cmd->cmd, n2->data, n2->data_size);
+            SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), n2->req_id, n2->connection_id, n2->type, cmd);
+            TAILQ_REMOVE(&tailhead, n2, entries);
+            free(n2);
+            free(cmd);
+    }
+    pthread_spin_unlock(&tailq_lock);
+}
+
+
 uint8_t ud_get_message()
 {
     int ne, i, j;
@@ -1037,7 +1056,7 @@ handle_server_join_request( struct ibv_wc *wc, ud_hdr_t *request )
     ep->last_req_id = request->id;
     
     /* Append CONFIG entry */
-    ep->cid_idx = log_append_non_csm_entry(SRV_DATA->log, 
+    ep->cid_idx = log_append_entry(SRV_DATA->log, 
             SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->id, 
             request->slid, CONFIG, &SRV_DATA->config.cid);
     //INFO_PRINT_LOG(log_fp, SRV_DATA->log);

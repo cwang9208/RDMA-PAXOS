@@ -3,33 +3,42 @@
 
 #include "../util/common-header.h"
 #include "../rsm-interface.h"
-#include "../../../utils/uthash/utlist.h"
 #include "../../../utils/uthash/uthash.h"
 #include "../db/db-interface.h"
-typedef struct inner_thread {
+#include "../dare/message.h"
+
+typedef uint16_t hk_t;
+typedef uint8_t nc_t;
+typedef uint8_t nid_t;
+
+struct list_entry_t {
     pthread_t tid;
-    struct inner_thread *next;
-}inner_thread;
+    LIST_ENTRY(list_entry_t) entries;
+};
+typedef struct list_entry_t list_entry_t;
+
+LIST_HEAD(, list_entry_t) listhead;
 
 typedef struct proxy_address_t{
     struct sockaddr_in s_addr;
     size_t s_sock_len;
 }proxy_address;
 
-struct follower_socket_pair_t{
+typedef struct socket_pair_t{
+    int clt_id;
+    uint64_t req_id;
     uint16_t connection_id;
     int p_s;
     
     UT_hash_handle hh;
-};
-typedef struct follower_socket_pair_t follower_socket_pair_t;
-
+}socket_pair;
 
 typedef struct proxy_node_t{
 	proxy_address sys_addr;
 
-    follower_socket_pair_t* hash_map;
-	inner_thread* inner_threads;
+    socket_pair* leader_hash_map;
+    socket_pair* follower_hash_map;
+    nc_t pair_count;
 	
     // log option
     int req_log;
