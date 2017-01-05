@@ -330,11 +330,6 @@ free_ib_device()
 /**
  * Poll UD CQ and retrieve the first message
  */
-void dare_ib_poll_proxy_queue()
-{
-    return get_proxy_message();
-}
-
 uint8_t dare_ib_poll_ud_queue()
 {
     return ud_get_message();

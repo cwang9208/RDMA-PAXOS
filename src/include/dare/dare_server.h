@@ -13,14 +13,17 @@
 #define DARE_SERVER_H 
 
 #include <stdio.h>
-#include <netinet/in.h>
-#include <fcntl.h>
 
 #include <ev.h>
 #include "../../../utils/rbtree/include/rbtree.h"
 #include "./dare_log.h"
 #include "./dare.h"
 #include "./timer.h"
+#include "../../../utils/uthash/uthash.h"
+
+typedef uint16_t hk_t;
+typedef uint8_t nc_t;
+typedef uint8_t nid_t;
 
 /* Server types */
 #define SRV_TYPE_START  1
@@ -175,6 +178,15 @@ struct dare_loggp_t {
 };
 typedef struct dare_loggp_t dare_loggp_t;
 
+struct leader_socket_pair_t{
+    int clt_id;
+    uint64_t req_id;
+    uint16_t connection_id;
+    
+    UT_hash_handle hh;
+};
+typedef struct leader_socket_pair_t leader_socket_pair_t;
+
 struct dare_server_data_t {
     dare_server_input_t *input;
     
@@ -197,8 +209,9 @@ struct dare_server_data_t {
     
     HRT_TIMESTAMP_T t1, t2;
 
-    struct sockaddr_in my_address;
-    int listener;
+    pthread_spinlock_t spinlock;
+    leader_socket_pair_t* hash_map;
+    nc_t pair_count;
 };
 typedef struct dare_server_data_t dare_server_data_t;
 /* ================================================================== */
@@ -209,5 +222,6 @@ void dare_server_shutdown();
 void server_to_follower();
 int server_update_sid( uint64_t new_sid, uint64_t old_sid );
 int is_leader();
+void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id);
 
 #endif /* DARE_SERVER_H */

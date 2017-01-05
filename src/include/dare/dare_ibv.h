@@ -148,7 +148,6 @@ void dare_ib_clt_shutdown();
 void dare_ib_destroy_ep( uint8_t idx );
 
 /* Starting a server */
-void dare_ib_poll_proxy_queue();
 uint8_t dare_ib_poll_ud_queue();
 int dare_ib_join_cluster();
 int dare_ib_exchange_rc_info();
