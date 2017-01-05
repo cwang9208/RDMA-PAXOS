@@ -1928,6 +1928,8 @@ apply_entry:
             data.sm->proxy_store_cmd(&entry->clt_id, data.sm->up_para);
             if (!IS_LEADER)
                 data.sm->proxy_do_action(entry->clt_id, entry->type, entry->data.cmd.len, &entry->data.cmd.cmd, data.sm->up_para);
+            else
+                data.sm->proxy_update_state(data.sm->up_para);
                 
             last_applied_entry.idx = entry->idx;
             last_applied_entry.term = entry->term;
