@@ -462,7 +462,7 @@ proxy_node* proxy_init(const char* config_path,const char* proxy_log_path)
         err_log("PROXY: Cannot init the lock\n");
     }
 
-	dare_main(proxy, config_path);
+    dare_main(proxy, config_path);
 
     return proxy;
 

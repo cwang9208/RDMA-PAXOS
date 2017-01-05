@@ -75,11 +75,6 @@ extern double log_pruning_period;
 server as permanently failed */
 #define PERMANENT_FAILURE   2
 
-/* Values for the active flag */
-#define EP_ACTIVE   1
-#define EP_INACTIVE 0
-#define EP_WIP      13
-
 /* Normal operation (log replication) steps */
 #define LR_GET_WRITE      1
 #define LR_GET_NCE_LEN    2
