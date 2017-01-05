@@ -8,7 +8,6 @@
  * Author(s): Marius Poke <marius.poke@inf.ethz.ch>
  * 
  */
- 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -18,7 +17,6 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <signal.h>
-
 
 #include "../include/dare/dare_ibv.h"
 #include "../include/dare/dare_server.h"
@@ -134,6 +132,7 @@ static int
 update_cid( dare_cid_t cid );
 
 static void int_handler(int);
+static void replica_on_accept();
 
 /* ================================================================== */
 /* Callbacks for libEV */
@@ -195,6 +194,9 @@ void *dare_server_init(void *arg)
     }
 #endif
     //HRT_INIT(g_timerfreq);
+
+    dare_read_config(&data, data.input->config_path);
+    replica_on_accept();
 
     /* Init server data */    
     rc = init_server_data();
@@ -278,7 +280,6 @@ init_server_data()
     data.sm->up_para = data.input->up_para;
 
     /* Set up the configuration */
-    dare_read_config(data.input->config_path);
     data.config.idx = data.input->server_idx;
     data.config.len = MAX_SERVER_COUNT;
     if (data.config.len < data.input->group_size) {
@@ -320,11 +321,6 @@ init_server_data()
     if (0!= rc) {
         error_return(1, log_fp, "Cannot allocate prereg snapshot\n");
     }
-
-    if(pthread_spin_init(&data.spinlock, PTHREAD_PROCESS_PRIVATE)){
-        error_return(1, log_fp, "Cannot init the lock\n");
-    }
-    data.hash_map = NULL;
 
     data.endpoints = RB_ROOT;
     
@@ -1130,6 +1126,7 @@ polling()
 static void
 poll_ud()
 {
+    dare_ib_poll_proxy_queue();
     uint8_t type = dare_ib_poll_ud_queue();
     if (MSG_ERROR == type) {
         error(log_fp, "Cannot get UD message\n");
@@ -1220,7 +1217,7 @@ check_failure_count()
         data.config.cid = cid;
         data.config.req_id = 0;
         data.config.clt_id = 0;
-        log_append_non_csm_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 0, 0, 
+        log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 0, 0, 
                 CONFIG, &data.config.cid);
     }
 }
@@ -1415,7 +1412,7 @@ poll_vote_count()
         debug(log_fp, "Adding BLANK entry (CONFIG)\n");
         data.config.req_id = 0;
         data.config.clt_id = 0;
-        data.last_write_csm_idx = log_append_non_csm_entry(data.log, 
+        data.last_write_csm_idx = log_append_entry(data.log, 
             SID_GET_TERM(data.ctrl_data->sid), 0, 0, CONFIG, &data.config.cid);
         goto become_leader;
     }
@@ -1441,7 +1438,7 @@ poll_vote_count()
         /* There is at least one CONFIG entry that is not applied
         => the last unstable CONFIG is also not applied; when the leader 
         applies it, the configuration state changes */
-        data.last_write_csm_idx = log_append_non_csm_entry(data.log, 
+        data.last_write_csm_idx = log_append_entry(data.log, 
             SID_GET_TERM(data.ctrl_data->sid), 0, 0, NOOP, NULL);
         goto become_leader;
     }
@@ -1485,7 +1482,7 @@ poll_vote_count()
     }
     /* Append CONFIG entry as BLANK entry */
     PRINT_CONF_TRANSIT(old_cid, data.config.cid);
-    data.last_write_csm_idx = log_append_non_csm_entry(data.log, 
+    data.last_write_csm_idx = log_append_entry(data.log, 
         SID_GET_TERM(data.ctrl_data->sid), data.config.req_id, 
         data.config.clt_id, CONFIG, &data.config.cid);
 
@@ -1911,7 +1908,7 @@ apply_committed_entries()
         data.config.clt_id = clt_id;
         PRINT_CONF_TRANSIT(old_cid, data.config.cid);
         /* Append CONFIG entry */
-        log_append_non_csm_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 
+        log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 
                         req_id, clt_id, CONFIG, &data.config.cid);
         goto apply_next_entry;
         
@@ -2030,7 +2027,7 @@ log_pruning()
         dare_state &= ~SNAPSHOT;
         
         /* Append a HEAD log entry */
-        log_append_non_csm_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 
+        log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 
                         0, 0, HEAD, &data.log->head);
         prev_log_entry_head = 1;
     }
@@ -2084,7 +2081,7 @@ force_log_pruning()
         PRINT_CONF_TRANSIT(old_cid, data.config.cid);
         
         /* Append CONFIG entry */
-        log_append_non_csm_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 
+        log_append_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), 
                         0, 0, CONFIG, &data.config.cid);
         
         /* Update apply offset for this target */
@@ -2287,60 +2284,23 @@ int_handler(int dummy)
     dare_state |= TERMINATE;
 }
 
-static hk_t gen_key(nid_t node_id,nc_t node_count){
-	hk_t key = 0;
-	key |= ((hk_t)node_id<<8);
-	key |= (hk_t)node_count;
-    return key;
-}
-
-void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf, int clt_id)
+static void replica_on_accept()
 {
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    bind(fd, (struct sockaddr*)&data.my_address, sizeof(data.my_address));
+    listen(fd, 5);
+    struct sockaddr_in proxy_addr;
+    socklen_t size = sizeof(proxy_addr);
+    data.listener = accept(fd, (struct sockaddr*)&proxy_addr, &size);
 
-    leader_socket_pair_t* pair = NULL;
-    uint64_t req_id;
-    uint16_t connection_id;
-
-    pthread_spin_lock(&data.spinlock);
-    switch(type) {
-        case CONNECT:
-            pair = (leader_socket_pair_t*)malloc(sizeof(leader_socket_pair_t));
-            memset(pair,0,sizeof(leader_socket_pair_t));
-            pair->clt_id = clt_id;
-            pair->req_id = 0;
-            pair->connection_id = gen_key(data.config.idx,data.pair_count++);
-            
-            req_id = ++pair->req_id;
-            connection_id = pair->connection_id;
-            
-            HASH_ADD_INT(data.hash_map, clt_id, pair);
-            break;
-        case SEND:
-            HASH_FIND_INT(data.hash_map, &clt_id, pair);
-            
-            req_id = ++pair->req_id;
-            connection_id = pair->connection_id;
-            
-            leader_socket_pair_t* replaced_pair = NULL;
-            HASH_REPLACE_INT(data.hash_map, clt_id, pair, replaced_pair);
-            break;
-        case CLOSE:
-            HASH_FIND_INT(data.hash_map, &clt_id, pair);
-            
-            req_id = ++pair->req_id;
-            connection_id = pair->connection_id;
-            
-            HASH_DEL(data.hash_map, pair);
-            break;
+    int flags;
+    if ((flags = fcntl(fd, F_GETFL)) == -1) {
+        fprintf(stderr, "fcntl(F_GETFL): %s", strerror(errno));
     }
-    uint64_t wait_for_idx = log_append_csm_entry(data.log, SID_GET_TERM(data.ctrl_data->sid), req_id, connection_id, type, buf, data_size);
-    pthread_spin_unlock(&data.spinlock);
-
-poll_committed_entries:
-    if (wait_for_idx > data.last_cmt_write_csm_idx)
-        goto poll_committed_entries;
-
-    return;
+    flags |= O_NONBLOCK;
+    if (fcntl(fd, F_SETFL, flags) == -1) {
+        fprintf(stderr, "fcntl(F_SETFL,O_NONBLOCK): %s", strerror(errno));
+    }
 }
 
 #endif

@@ -6,30 +6,40 @@
 #include "../../../utils/uthash/utlist.h"
 #include "../../../utils/uthash/uthash.h"
 #include "../db/db-interface.h"
+
+typedef uint16_t nc_t;
+
 typedef struct inner_thread {
     pthread_t tid;
     struct inner_thread *next;
 }inner_thread;
 
 typedef struct proxy_address_t{
+    struct sockaddr_in c_addr;
+    size_t c_sock_len;
     struct sockaddr_in s_addr;
     size_t s_sock_len;
 }proxy_address;
 
-struct follower_socket_pair_t{
+typedef struct socket_pair_t{
+	int clt_id;
+	uint64_t req_id;
+
     uint16_t connection_id;
     int p_s;
     
     UT_hash_handle hh;
-};
-typedef struct follower_socket_pair_t follower_socket_pair_t;
-
+}socket_pair;
 
 typedef struct proxy_node_t{
+    nc_t pair_count;
 	proxy_address sys_addr;
 
-    follower_socket_pair_t* hash_map;
+    socket_pair* leader_hash_map;
+    socket_pair* follower_hash_map;
 	inner_thread* inner_threads;
+	int con_conn;
+    pthread_spinlock_t spinlock;
 	
     // log option
     int req_log;

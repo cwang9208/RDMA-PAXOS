@@ -24,10 +24,6 @@
 #define CONFIG  2
 #define HEAD    3
 
-#define CONNECT 4
-#define SEND    5
-#define CLOSE   6
-
 extern int prev_log_entry_head;
 
 /* Entry types: <CSM, cmd> 
@@ -461,13 +457,14 @@ log_get_tail( dare_log_t* log )
  * ! safe over RDMA
  */
 static uint64_t 
-log_append_non_csm_entry( dare_log_t* log,
+log_append_entry( dare_log_t* log,
                     uint64_t term, 
                     uint64_t req_id,
                     uint16_t clt_id,
                     uint8_t  type,
                     void *data )
 {
+    sm_cmd_t *cmd = (sm_cmd_t*)data;
     dare_cid_t *cid = (dare_cid_t*)data;
     uint64_t *head = (uint64_t*)data;
     if (type != HEAD) {
@@ -500,6 +497,31 @@ log_append_non_csm_entry( dare_log_t* log,
     
     /* Add data of the new entry */
     switch(type) {
+        case CSM:
+        {
+//info(log_fp, "### add log entry CSM\n");
+            entry->data.cmd.len = cmd->len;
+            if (!log_fit_entry(log, log->end, entry)) {
+                /* Not enough place for an entry (with the command) */
+                log->end = 0;
+                entry = log_add_new_entry(log);
+                if (!entry) {
+                    info_wtime(log_fp, "The LOG is full\n");
+                    return 0;
+                }
+                entry->idx          = idx;
+                entry->term         = term;
+                entry->req_id       = req_id;
+                entry->clt_id       = clt_id;
+                entry->type         = type;
+                entry->data.cmd.len = cmd->len;
+            }
+            /* Copy the command */
+            if (cmd->len) {
+                memcpy(entry->data.cmd.cmd, cmd->cmd, entry->data.cmd.len);
+            }
+            break;
+        }
         case CONFIG:
 //info(log_fp, "### add log entry CONFIG\n");
             entry->data.cid = *cid;
@@ -517,81 +539,10 @@ log_append_non_csm_entry( dare_log_t* log,
     /* Set new end */
     log->end += log_entry_len(entry);
 
-    TEXT_PRINT_LOG(log_fp, log);
-    
-    return idx;
-}
-
-static uint64_t 
-log_append_csm_entry( dare_log_t* log,
-                    uint64_t term, 
-                    uint64_t req_id,
-                    uint16_t clt_id,
-                    uint8_t  type,
-                    void *data,
-                    ssize_t len )
-{
-    if (type != HEAD) {
-        /* Avoid double HEAD */
-        prev_log_entry_head = 0;
-    }
-
-    /* Compute new index */
-    if (log->tail == log->len) {
-        log->tail = log_get_tail(log);
-    }
-    uint64_t offset = log->tail;
-    dare_log_entry_t *last_entry = log_get_entry(log, &offset);
-    uint64_t idx = last_entry ? last_entry->idx + 1 : 1;
-    
-    /* Create new entry */
-    dare_log_entry_t *entry = log_add_new_entry(log);
-    if (!entry) {
-        info_wtime(log_fp, "The LOG is full\n");
-        return 0;
-    }
-    entry->idx     = idx;
-    entry->term    = term;
-    entry->req_id  = req_id;
-    entry->clt_id  = clt_id;
-    entry->type    = type;
-    if (!log_fit_entry_header(log, log->end)) {
-        log->end = 0;
-    }
-    
-    /* Add data of the new entry */
-    switch(type) {
-        default:
-        {
-//info(log_fp, "### add log entry CSM\n");
-            entry->data.cmd.len = len;
-            if (!log_fit_entry(log, log->end, entry)) {
-                /* Not enough place for an entry (with the command) */
-                log->end = 0;
-                entry = log_add_new_entry(log);
-                if (!entry) {
-                    info_wtime(log_fp, "The LOG is full\n");
-                    return 0;
-                }
-                entry->idx          = idx;
-                entry->term         = term;
-                entry->req_id       = req_id;
-                entry->clt_id       = clt_id;
-                entry->type         = type;
-                entry->data.cmd.len = len;
-            }
-            /* Copy the command */
-            if (len) {
-                memcpy(entry->data.cmd.cmd, data, entry->data.cmd.len);
-            }
-            break;
-        }
-    }
-    /* Set new tail (offset of last entry) */
-    log->tail = log->end;
-    /* Set new end */
-    log->end += log_entry_len(entry);
-
+    text(log_fp, "APPENDED ENTRY [%s]: ", 
+            (entry->type == CSM) ? "CSM" : 
+            (entry->type == CONFIG) ? "CONFIG" : 
+            (entry->type == HEAD) ? "HEAD" : "NOOP");
     TEXT_PRINT_LOG(log_fp, log);
     
     return idx;

@@ -28,7 +28,7 @@ int proxy_read_config(struct proxy_node_t* cur_node,const char* config_path){
     }
     cur_node->db_name[db_name_len] = '\0';
 
-
+// parse server address
     const char* peer_ipaddr=NULL;
     int peer_port=-1;
     if(!config_lookup_string(&config_file,"ip_address",&peer_ipaddr)){
@@ -44,6 +44,29 @@ int proxy_read_config(struct proxy_node_t* cur_node,const char* config_path){
 
     cur_node->sys_addr.s_sock_len = sizeof(cur_node->sys_addr.s_addr);
 
+
+// parse consensus address
+    config_setting_t *consensus_config;
+    consensus_config = config_lookup(&config_file,"consensus_config");
+
+    if(NULL==consensus_config){
+        err_log("PROXY : Cannot Find Nodes Settings \n");
+        goto goto_config_error;
+    }    
+
+    peer_ipaddr=NULL;
+    peer_port=-1;
+
+    if(!config_setting_lookup_string(consensus_config,"ip_address",&peer_ipaddr)){
+        goto goto_config_error;
+    }
+    if(!config_setting_lookup_int(consensus_config,"port",&peer_port)){
+        goto goto_config_error;
+    }
+    cur_node->sys_addr.c_addr.sin_port = htons(peer_port);
+    cur_node->sys_addr.c_addr.sin_family = AF_INET;
+    inet_pton(AF_INET,peer_ipaddr,&cur_node->sys_addr.c_addr.sin_addr);
+    cur_node->sys_addr.c_sock_len = sizeof(cur_node->sys_addr.c_addr);
 
     config_destroy(&config_file);
     return 0;

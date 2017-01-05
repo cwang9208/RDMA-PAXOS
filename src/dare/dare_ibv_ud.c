@@ -20,7 +20,6 @@
 #include <inttypes.h>
 #include<arpa/inet.h>
 
-
 #include "../include/dare/dare_ibv_ud.h"
 #include "../include/dare/dare_ibv_rc.h"
 #include "../include/dare/dare_ibv.h"
@@ -28,6 +27,8 @@
 #include "../include/dare/dare_server.h"
 #include "../include/dare/dare_client.h"
 #include "../include/dare/timer.h"
+
+#include "../include/dare/message.h"
 extern FILE *log_fp;
 
 /* InfiniBand device */
@@ -771,6 +772,32 @@ mcast_send_message( uint32_t len )
     return 0;
 }
 
+void get_proxy_message()
+{
+    sys_msg_header* buf = NULL;
+    ssize_t n;
+    buf = (sys_msg_header*)malloc(SYS_MSG_HEADER_SIZE);
+get_message:
+    n = read(SRV_DATA->listener, buf, SYS_MSG_HEADER_SIZE);
+    if (n > 0)
+    {
+        int data_size = buf->data_size;
+        sm_cmd_t *cmd = malloc(buf->data_size+sizeof(sm_cmd_t));
+        cmd->len = data_size;
+        if (data_size > 0)
+        {
+            int bytes_read = 0;
+            do {
+                bytes_read += read(SRV_DATA->listener, cmd->cmd + bytes_read, data_size - bytes_read);
+            } while(bytes_read < data_size);
+        }
+        SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), buf->req_id, buf->connection_id, CSM, cmd);
+        goto get_message;
+    }
+
+    return;
+}
+
 uint8_t ud_get_message()
 {
     int ne, i, j;
@@ -1037,7 +1064,7 @@ handle_server_join_request( struct ibv_wc *wc, ud_hdr_t *request )
     ep->last_req_id = request->id;
     
     /* Append CONFIG entry */
-    ep->cid_idx = log_append_non_csm_entry(SRV_DATA->log, 
+    ep->cid_idx = log_append_entry(SRV_DATA->log, 
             SID_GET_TERM(SRV_DATA->ctrl_data->sid), request->id, 
             request->slid, CONFIG, &SRV_DATA->config.cid);
     //INFO_PRINT_LOG(log_fp, SRV_DATA->log);
