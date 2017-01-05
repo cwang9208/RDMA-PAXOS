@@ -21,8 +21,6 @@
 #include "./dare_config.h"
 #include "./dare_ep_db.h"
 
-#include "./message.h"
-
 #define REQ_MAJORITY 13
 
 /* ================================================================== */

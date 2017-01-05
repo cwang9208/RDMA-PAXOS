@@ -24,10 +24,6 @@
 #define CONFIG  2
 #define HEAD    3
 
-#define CONNECT 4
-#define SEND    5
-#define CLOSE   6
-
 extern int prev_log_entry_head;
 
 /* Entry types: <CSM, cmd> 
@@ -501,7 +497,18 @@ log_append_entry( dare_log_t* log,
     
     /* Add data of the new entry */
     switch(type) {
-        case CSM:
+        case CONFIG:
+//info(log_fp, "### add log entry CONFIG\n");
+            entry->data.cid = *cid;
+            break;
+        case HEAD:
+//info(log_fp, "### add log entry HEAD\n");
+            entry->data.head = *head;
+            break;
+        case NOOP:
+//info(log_fp, "### add log entry NOOP\n");
+            break;
+        default:
         {
 //info(log_fp, "### add log entry CSM\n");
             entry->data.cmd.len = cmd->len;
@@ -526,17 +533,6 @@ log_append_entry( dare_log_t* log,
             }
             break;
         }
-        case CONFIG:
-//info(log_fp, "### add log entry CONFIG\n");
-            entry->data.cid = *cid;
-            break;
-        case HEAD:
-//info(log_fp, "### add log entry HEAD\n");
-            entry->data.head = *head;
-            break;
-        case NOOP:
-//info(log_fp, "### add log entry NOOP\n");
-            break;
     }
     /* Set new tail (offset of last entry) */
     log->tail = log->end;

@@ -275,6 +275,7 @@ init_server_data()
     data.sm->proxy_get_db_size = data.input->get_db_size;
     data.sm->proxy_create_db_snapshot = data.input->create_db_snapshot;
     data.sm->proxy_apply_db_snapshot = data.input->apply_db_snapshot;
+    data.sm->proxy_update_state = data.input->update_state;
     data.sm->up_para = data.input->up_para;
 
     /* Set up the configuration */

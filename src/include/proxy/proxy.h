@@ -7,6 +7,10 @@
 #include "../db/db-interface.h"
 #include "../dare/message.h"
 
+#define CONNECT 4
+#define SEND    5
+#define CLOSE   6
+
 typedef uint16_t hk_t;
 typedef uint8_t nc_t;
 typedef uint8_t nid_t;
@@ -38,6 +42,8 @@ typedef struct proxy_node_t{
 
     socket_pair* leader_hash_map;
     socket_pair* follower_hash_map;
+    uint64_t highest_rec;
+    uint64_t cur_rec;
     nc_t pair_count;
 	
     // log option

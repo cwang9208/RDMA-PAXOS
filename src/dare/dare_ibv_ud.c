@@ -28,6 +28,9 @@
 #include "../include/dare/dare_server.h"
 #include "../include/dare/dare_client.h"
 #include "../include/dare/timer.h"
+
+#include "../include/dare/message.h"
+
 extern FILE *log_fp;
 
 /* InfiniBand device */
@@ -773,17 +776,17 @@ mcast_send_message( uint32_t len )
 
 void get_tailq_message()
 {
-    tailq_entry_t* n2;
+    tailq_entry_t* n3;
     pthread_spin_lock(&tailq_lock);
     while (!TAILQ_EMPTY(&tailhead)) {
-            n2 = TAILQ_FIRST(&tailhead);
-            sm_cmd_t* cmd = malloc(sizeof(sm_cmd_t) + n2->data_size);
-            cmd->len = n2->data_size;
+            n3 = TAILQ_FIRST(&tailhead);
+            sm_cmd_t* cmd = malloc(sizeof(sm_cmd_t) + n3->data_size);
+            cmd->len = n3->data_size;
             if (cmd->len)
-                memcpy(cmd->cmd, n2->data, n2->data_size);
-            SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), n2->req_id, n2->connection_id, n2->type, cmd);
-            TAILQ_REMOVE(&tailhead, n2, entries);
-            free(n2);
+                memcpy(cmd->cmd, n3->data, n3->data_size);
+            SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), n3->req_id, n3->connection_id, n3->type, cmd);
+            TAILQ_REMOVE(&tailhead, n3, entries);
+            free(n3);
             free(cmd);
     }
     pthread_spin_unlock(&tailq_lock);

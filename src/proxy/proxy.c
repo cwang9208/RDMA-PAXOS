@@ -9,6 +9,7 @@ static void stablestorage_save_request(void* data,void*arg);
 static void stablestorage_dump_records(void*buf,void*arg);
 static uint32_t stablestorage_get_records_len(void*arg);
 static int stablestorage_load_records(void*buf,uint32_t size,void*arg);
+static void update_highest_rec(void*arg);
 static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,void* data,void *arg);
 static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg);
 static void do_action_connect(uint16_t clt_id,void* arg);
@@ -41,6 +42,7 @@ int dare_main(proxy_node* proxy, const char* config_path)
     input->get_db_size = stablestorage_get_records_len;
     input->create_db_snapshot = stablestorage_dump_records;
     input->apply_db_snapshot = stablestorage_load_records;
+    input->update_state = update_highest_rec;
     memcpy(input->config_path, config_path, strlen(config_path));
     input->up_para = proxy;
     static int srv_type = SRV_TYPE_START;
@@ -105,6 +107,7 @@ static void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf,
     uint16_t connection_id;
 
     pthread_spin_lock(&tailq_lock);
+    uint64_t cur_rec = ++proxy->cur_rec;
     switch(type) {
         case CONNECT:
             pair = (socket_pair*)malloc(sizeof(socket_pair));
@@ -150,9 +153,8 @@ static void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf,
 
     pthread_spin_unlock(&tailq_lock);
 
-    //while (wait_for_idx > data.last_cmt_write_csm_idx);
+    while (cur_rec > proxy->highest_rec);
 }
-
 
 static int set_blocking(int fd, int blocking) {
     int flags;
@@ -203,6 +205,12 @@ void proxy_on_close(proxy_node* proxy, int fd)
         leader_handle_submit_req(CLOSE, 0, NULL, fd, proxy);
 
 	return;
+}
+
+static void update_highest_rec(void*arg)
+{
+    proxy_node* proxy = arg;
+    proxy->highest_rec++;   
 }
 
 static void stablestorage_save_request(void* data,void*arg)
