@@ -17,3 +17,7 @@ Prerequisites
  
 1. Set env vars in ~/.bashrc.
  > export PAXOS_ROOT=<absolute path of RDMA-PAXOS>
+
+2. Compile.
+ > cd target
+ > make clean; make
