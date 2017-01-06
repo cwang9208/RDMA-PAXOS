@@ -5,7 +5,7 @@
 #include "../rsm-interface.h"
 #include "../../../utils/uthash/uthash.h"
 #include "../db/db-interface.h"
-#include "../dare/message.h"
+#include <sys/queue.h>
 
 #define CONNECT 4
 #define SEND    5

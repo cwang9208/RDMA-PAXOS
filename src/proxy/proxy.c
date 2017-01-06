@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <netinet/tcp.h>
 #include "../include/dare/dare_server.h"
+#include "../include/dare/message.h"
 #define __STDC_FORMAT_MACROS
 
 static void stablestorage_save_request(void* data,void*arg);
@@ -147,9 +148,9 @@ static void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf,
     n2->req_id = req_id;
     n2->connection_id = connection_id;
     n2->type = type;
-    n2->data_size = data_size;
+    n2->cmd.len = data_size;
     if (data_size)
-        memcpy(n2->data, buf, data_size);
+        memcpy(n2->cmd.cmd, buf, data_size);
     TAILQ_INSERT_TAIL(&tailhead, n2, entries);
 
     pthread_spin_unlock(&tailq_lock);

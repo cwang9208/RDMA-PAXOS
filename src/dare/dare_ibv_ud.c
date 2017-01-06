@@ -780,14 +780,9 @@ void get_tailq_message()
     pthread_spin_lock(&tailq_lock);
     while (!TAILQ_EMPTY(&tailhead)) {
             n3 = TAILQ_FIRST(&tailhead);
-            sm_cmd_t* cmd = malloc(sizeof(sm_cmd_t) + n3->data_size);
-            cmd->len = n3->data_size;
-            if (cmd->len)
-                memcpy(cmd->cmd, n3->data, n3->data_size);
-            SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), n3->req_id, n3->connection_id, n3->type, cmd);
+            SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), n3->req_id, n3->connection_id, n3->type, &n3->cmd);//cmd);
             TAILQ_REMOVE(&tailhead, n3, entries);
             free(n3);
-            free(cmd);
     }
     pthread_spin_unlock(&tailq_lock);
 }
