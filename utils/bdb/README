@@ -1,0 +1,9 @@
+
+1. tar -xvf db-5.1.29.tar.gz
+2. cd build_unix
+3. ../dist/configure
+4. make
+5. make install
+
+Libraries have been installed in:
+   /usr/local/BerkeleyDB.5.1/lib
