@@ -77,6 +77,7 @@ int dare_main(proxy_node* proxy, const char* config_path)
     }
 
     list_entry_t *n1 = malloc(sizeof(list_entry_t));
+    n1->tid = dare_thread;
     LIST_INSERT_HEAD(&listhead, n1, entries);
     //fclose(log_fp);
     
