@@ -143,8 +143,7 @@ static void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf,
             break;
     }
 
-    tailq_entry_t* n2;
-    n2 = malloc(sizeof(tailq_entry_t));
+    tailq_entry_t* n2 = (tailq_entry_t*)malloc(sizeof(tailq_entry_t));
     n2->req_id = req_id;
     n2->connection_id = connection_id;
     n2->type = type;

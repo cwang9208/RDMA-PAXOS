@@ -786,7 +786,6 @@ void get_tailq_message()
     pthread_spin_unlock(&tailq_lock);
 }
 
-
 uint8_t ud_get_message()
 {
     int ne, i, j;
