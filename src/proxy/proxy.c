@@ -453,9 +453,9 @@ proxy_node* proxy_init(const char* config_path,const char* proxy_log_path)
     TAILQ_INIT(&tailhead);
     LIST_INIT(&listhead);
 
-	proxy->db_ptr = initialize_db(proxy->db_name,0);
+    proxy->db_ptr = initialize_db(proxy->db_name,0);
 
-	proxy->follower_hash_map = NULL;
+    proxy->follower_hash_map = NULL;
     proxy->leader_hash_map = NULL;
 
     if(pthread_spin_init(&tailq_lock, PTHREAD_PROCESS_PRIVATE)){

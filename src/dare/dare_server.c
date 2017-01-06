@@ -1933,7 +1933,7 @@ apply_entry:
                 
             last_applied_entry.idx = entry->idx;
             last_applied_entry.term = entry->term;
-            last_applied_entry.offset = data.log->apply;
+            last_applied_entry.offset = data.log->apply + log_entry_len(entry);
             /* Needed for answering read requests */
             data.last_cmt_write_csm_idx = entry->idx;
         }
