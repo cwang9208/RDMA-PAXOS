@@ -156,6 +156,25 @@ static void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf,
     while (cur_rec > proxy->highest_rec);
 }
 
+static void get_socket_buffer_size(int sockfd)
+{
+    socklen_t i;
+    size_t len;
+
+    i = sizeof(len);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &len, &i) < 0) {
+        perror(": getsockopt");
+    }
+
+    printf("receive buffer size = %d\n", len);
+
+    if (getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &len, &i) < 0) {
+        perror(": getsockopt");
+    }
+
+    printf("send buffer size = %d\n", len);
+}
+
 static int set_blocking(int fd, int blocking) {
     int flags;
 

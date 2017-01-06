@@ -7,8 +7,8 @@ struct tailq_entry_t {
 	uint16_t connection_id;
 	uint64_t req_id;
 	ssize_t data_size;
-	char data[1024]; //TODO
-	TAILQ_ENTRY(tailq_entry_t) entries;     /* Tail queue. */
+	char data[87380];
+	TAILQ_ENTRY(tailq_entry_t) entries;
 };
 typedef struct tailq_entry_t tailq_entry_t;
 
