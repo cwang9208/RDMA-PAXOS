@@ -776,11 +776,10 @@ mcast_send_message( uint32_t len )
 
 void get_tailq_message()
 {
-    tailq_entry_t* n3;
     pthread_spin_lock(&tailq_lock);
     while (!TAILQ_EMPTY(&tailhead)) {
-            n3 = TAILQ_FIRST(&tailhead);
-            SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), n3->req_id, n3->connection_id, n3->type, &n3->cmd);//cmd);
+            tailq_entry_t* n3 = TAILQ_FIRST(&tailhead);
+            SRV_DATA->last_write_csm_idx = log_append_entry(SRV_DATA->log, SID_GET_TERM(SRV_DATA->ctrl_data->sid), n3->req_id, n3->connection_id, n3->type, &n3->cmd);
             TAILQ_REMOVE(&tailhead, n3, entries);
             free(n3);
     }
