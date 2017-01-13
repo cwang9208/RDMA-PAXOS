@@ -11,8 +11,8 @@ To build mcperf from distribution tarball:
 
 ## Help ##
 
-    Usage: mcperf [-s server] [-p port] [-H] [-l linger]
-                  [-c client] [-n num-conns] [-N num-calls]
+    Usage: mcperf [-s server] [-p port] [-l linger]
+                  [-n num-conns] [-N num-calls]
                   [-r conn-rate] [-R call-rate] [-z sizes]
 
     Options:
