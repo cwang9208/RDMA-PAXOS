@@ -8,7 +8,6 @@ To build mcperf from distribution tarball:
     $ make
     $ sudo make install
 
-
 ## Help ##
 
     Usage: mcperf [-s server] [-p port] [-l linger]
@@ -25,6 +24,11 @@ To build mcperf from distribution tarball:
       -R, --call-rate=R     : set the call creation rate (default: 0 calls/sec)
       -z, --sizes=R         : set the distribution for item sizes (default: d1 bytes)
       ...
+
+## Design ##
+
+1. Single threaded.
+2. Asynchronous I/O through non-blocking sockets and Linux epoll(7) syscall.
 
 ## Examples ##
 
