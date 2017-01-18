@@ -7,6 +7,8 @@ APP_DIR=$PAXOS_ROOT/apps/memcached
 # -p <num>      TCP port number to listen on (default: 11211)
 # -d            run as a daemon
 # -P <file>     save PID in <file>, only used with -d option
+# -m <num>      max memory to use for items in megabytes (default: 64 MB)
+# -M            return error on memory exhausted (rather than removing items)
 cd $APP_DIR/install
 bin/memcached -p 11222 -P $APP_DIR/install/memcached.pid &
 sleep 1
