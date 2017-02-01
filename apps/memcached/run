@@ -9,6 +9,7 @@ APP_DIR=$PAXOS_ROOT/apps/memcached
 # -P <file>     save PID in <file>, only used with -d option
 # -m <num>      max memory to use for items in megabytes (default: 64 MB)
 # -M            return error on memory exhausted (rather than removing items)
+# -u <username> assume identity of <username> (only when run as root)
 cd $APP_DIR/install
 bin/memcached -p 11222 -P $APP_DIR/install/memcached.pid &
 sleep 1
