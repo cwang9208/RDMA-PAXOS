@@ -411,12 +411,15 @@ ud_qp_create()
     uint8_t raw[16];
     global_mgid = getenv("mgid");
     if (!global_mgid) {
-        error_return(1, log_fp, "mcast address is NULL\n");
+    	uint8_t mcg_gid[16] = MCG_GID;
+    	memcpy(raw, mcg_gid, 16);
     }
-    if (ipv6_string_to_raw(global_mgid, raw)) {
-        error_return(1, log_fp, "ipv6_string_to_raw");
+    else {
+    	if (ipv6_string_to_raw(global_mgid, raw)) {
+    		error_return(1, log_fp, "ipv6_string_to_raw");
+    	}
+    	info(log_fp, "# mcast addr: [%s]\n", global_mgid);
     }
-    info(log_fp, "# mcast addr: [%s]\n", global_mgid);
 
     //Uncomment the following code to see the contents of raw
     // printf("\nThe GLOBAL raw address is\n");
