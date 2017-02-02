@@ -410,7 +410,7 @@ ud_qp_create()
     
     uint8_t raw[16];
     global_mgid = getenv("mgid");
-    if (!global_mgid) {
+    if (!global_mgid || strcmp(global_mgid, "") == 0) {
     	uint8_t mcg_gid[16] = MCG_GID;
     	memcpy(raw, mcg_gid, 16);
     }
