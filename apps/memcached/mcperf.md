@@ -23,6 +23,8 @@ To build mcperf from distribution tarball:
       -r, --conn-rate=R     : set the connection creation rate (default: 0 conns/sec)
       -R, --call-rate=R     : set the call creation rate (default: 0 calls/sec)
       -z, --sizes=R         : set the distribution for item sizes (default: d1 bytes)
+
+      -q, --use-noreply     : set noreply for generated requests
       ...
 
 ## Design ##
@@ -47,3 +49,22 @@ every request is created after we have received the response for the previous
 request. All the set requests generated have a fixed item size of 1 byte.
 
     $ mcperf --linger=0 --conn-rate=0 --call-rate=0 --num-calls=100 --num-conns=100 --sizes=d1
+
+## Protocol ##
+
+### Storage commands ###
+First, the client sends a command line which looks like this:
+
+    <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
+
+- `<command name>` is "set", "add", "replace", "append" or "prepend"
+
+- `noreply` optional parameter instructs the server to not send the reply.
+
+### Error strings ###
+
+Each command sent by a client may be answered with an error string from the server. These error strings come in three types:
+
+- `SERVER_ERROR <error>\r\n`
+
+  means some sort of server error prevents the server from carrying out the command. `<error>` is a human-readable error string. In cases of severe server errors, which make it impossible to continue serving the client (this shouldn't normally happen), the server will close the connection after sending the error line. This is the only case in which the server closes a connection to a client.
