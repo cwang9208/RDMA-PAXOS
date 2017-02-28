@@ -49,8 +49,11 @@ int dare_main(proxy_node* proxy, const char* config_path)
     static int srv_type = SRV_TYPE_START;
 
     const char *server_type = getenv("server_type");
-    if (strcmp(server_type, "join") == 0)
-    	srv_type = SRV_TYPE_JOIN;
+    if (server_type != NULL) {
+        if (strcmp(server_type, "join") == 0) {
+            srv_type = SRV_TYPE_JOIN;
+        }
+    }
     char *dare_log_file = getenv("dare_log_file");
     if (dare_log_file == NULL)
         dare_log_file = "";
