@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# import threading
+import threading
 import ConfigParser
 import re
 import argparse
@@ -10,9 +10,9 @@ import os
 import subprocess
 from signal import signal
 # tom add 2014-12-23
-# import matplotlib
-# matplotlib.use('Agg')
-# import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 # end tom add 2014-12-23
 
 def getMsmrDefaultOptions():
@@ -65,26 +65,26 @@ def readConfigFile(config_file):
 		if ret:	
 			return newConfig
 
-# def getGitInfo():
-#     import commands
-#     git_show = 'cd '+MSMR_ROOT+' && git show '
-#     githash = commands.getoutput(git_show+'| head -1 | sed -e "s/commit //"')
-#     git_diff = 'cd '+MSMR_ROOT+' && git diff --quiet'
-#     diff = commands.getoutput('cd ' +MSMR_ROOT+ ' && git diff')
-#     if diff:
-#         gitstatus = '_dirty'
-#     else:
-#         gitstatus = ''
-#     commit_date = commands.getoutput( git_show+
-#             '| head -4 | grep "Date:" | sed -e "s/Date:[ \t]*//"' )
-#     date_tz  = re.compile(r'^.* ([+-]\d\d\d\d)$').match(commit_date).group(1)
-#     date_fmt = ('%%a %%b %%d %%H:%%M:%%S %%Y %s') % date_tz
-#     import datetime
-#     gitcommitdate = str(datetime.datetime.strptime(commit_date, date_fmt))
-#     logging.debug( "git 6 digits hash code: " + githash[0:6] )
-#     logging.debug( "git reposotory status: " + gitstatus)
-#     logging.debug( "git commit date: " + gitcommitdate)
-#     return [githash[0:6], gitstatus, gitcommitdate, diff]
+def getGitInfo():
+    import commands
+    git_show = 'cd '+MSMR_ROOT+' && git show '
+    githash = commands.getoutput(git_show+'| head -1 | sed -e "s/commit //"')
+    git_diff = 'cd '+MSMR_ROOT+' && git diff --quiet'
+    diff = commands.getoutput('cd ' +MSMR_ROOT+ ' && git diff')
+    if diff:
+        gitstatus = '_dirty'
+    else:
+        gitstatus = ''
+    commit_date = commands.getoutput( git_show+
+            '| head -4 | grep "Date:" | sed -e "s/Date:[ \t]*//"' )
+    date_tz  = re.compile(r'^.* ([+-]\d\d\d\d)$').match(commit_date).group(1)
+    date_fmt = ('%%a %%b %%d %%H:%%M:%%S %%Y %s') % date_tz
+    import datetime
+    gitcommitdate = str(datetime.datetime.strptime(commit_date, date_fmt))
+    logging.debug( "git 6 digits hash code: " + githash[0:6] )
+    logging.debug( "git reposotory status: " + gitstatus)
+    logging.debug( "git commit date: " + gitcommitdate)
+    return [githash[0:6], gitstatus, gitcommitdate, diff]
 
 #make directory
 def mkdir_p(path):
@@ -96,22 +96,12 @@ def mkdir_p(path):
 			pass
 		else: raise
 
-# def genRunDir(config_file, git_info):
-# 	dir_name = ""
-# 	from os.path import basename
-# 	config_name = os.path.splitext(basename(config_file))[0]
-# 	from time import strftime
-# 	dir_name += config_name + strftime("%Y%b%d_%H%M%S") + '_' + git_info[0] +git_info[1]
-# 	mkdir_p(dir_name)
-# 	logging.debug("creating %s" % dir_name)
-# 	return os.path.abspath(dir_name)
-
-def genRunDir(config_file):
+def genRunDir(config_file, git_info):
 	dir_name = ""
 	from os.path import basename
 	config_name = os.path.splitext(basename(config_file))[0]
 	from time import strftime
-	dir_name += config_name + strftime("%Y%b%d_%H%M%S")
+	dir_name += config_name + strftime("%Y%b%d_%H%M%S") + '_' + git_info[0] +git_info[1]
 	mkdir_p(dir_name)
 	logging.debug("creating %s" % dir_name)
 	return os.path.abspath(dir_name)
@@ -633,7 +623,7 @@ if __name__ == "__main__":
 		logging.debug("find 'bash' at %s" % bash_path)
 
 	default_options = getMsmrDefaultOptions()
-	# git_info = getGitInfo()
+	git_info = getGitInfo()
 	root_dir = os.getcwd()
 	# tom add 20150126
 	if args.v == True:
@@ -649,8 +639,7 @@ if __name__ == "__main__":
 			logging.warning("skip " + full_path)
 			continue
 		
-		# run_dir = genRunDir(full_path, git_info)
-		run_dir = genRunDir(full_path)
+		run_dir = genRunDir(full_path, git_info)
 		try:
 			os.unlink('current')
 		except OSError:
@@ -659,14 +648,14 @@ if __name__ == "__main__":
 		if not run_dir:
 			continue
 		os.chdir(run_dir)
-		# if git_info[3]:
-		# 	with open("git_diff", "w") as diff:
-		# 		diff.write(git_info[3])
+		if git_info[3]:
+			with open("git_diff", "w") as diff:
+				diff.write(git_info[3])
 
 		benchmarks = local_config.sections()
-		# all_threads = []
-		# semaphore = threading.BoundedSemaphore(1)
-		# log_lock = threading.Lock()
+		all_threads = []
+		semaphore = threading.BoundedSemaphore(1)
+		log_lock = threading.Lock()
 		for benchmark in benchmarks:
 			if benchmark == "default" or benchmark == "example":
 				continue
