@@ -30,7 +30,7 @@ def getConfigFullPath(config_file):
 # The configuration file consists of sections, led by a [section]
 # header and followed by name: value entries; name=value is also accepted.
 # Default values can be specified by passing them into the ConfigParser constructor as a dictionary.
-
+#
 # RawConfigParser Objects
 # - RawConfigParser.sections()
 #       Return a list of the sections available.
@@ -39,7 +39,7 @@ def getConfigFullPath(config_file):
 #       successfully parsed.
 # - RawConfigParser.get(section, option)
 #     Get an option value for the named section.
-
+#
 # ConfigParser Objects
 # The ConfigParser class extends some methods of the RawConfigParser interface, adding some optional
 # arguments.
@@ -623,7 +623,7 @@ if __name__ == "__main__":
 	#     Logs a message with level INFO on this logger.
 	# Logger.addHandler(hdlr)
 	#     Adds the specified handler hdlr to this logger.
-
+	#
 	# Handler Objects
 	# Handler.setLevel(lvl)
 	#     Sets the threshold for this handler to lvl. Logging messages which are less severe than lvl will be ignored.
