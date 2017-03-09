@@ -27,6 +27,23 @@ def getConfigFullPath(config_file):
 		return None
 	return os.path.abspath(config_file)
 
+# The configuration file consists of sections, led by a [section]
+# header and followed by name: value entries; name=value is also accepted.
+# Default values can be specified by passing them into the ConfigParser constructor as a dictionary.
+
+# RawConfigParser Objects
+# - RawConfigParser.sections()
+#       Return a list of the sections available.
+# - RawConfigParser.read(filenames)
+#       Attempt to read and parse a list of filenames, returning a list of filenames which were
+#       successfully parsed.
+# - RawConfigParser.get(section, option)
+#     Get an option value for the named section.
+
+# ConfigParser Objects
+# The ConfigParser class extends some methods of the RawConfigParser interface, adding some optional
+# arguments.
+
 def readConfigFile(config_file):
 	try:
 		newConfig = ConfigParser.ConfigParser({"REPEATS":"1",
@@ -290,6 +307,22 @@ def preSetting(config, bench, apps_name):
 		for i in range(int(config.get(bench,'CLIENT_COUNT'))):
 			os.system("cp "+config.get(bench,'CLIENT_PROGRAM')+' ../client'+str(int(i)+1)+'/client')
 	testname = bench.replace(' ','').replace('<port>','').replace('/','')
+
+	# The with statement is used to wrap the execution of a block with methods defined by a context manager.
+	#
+	# with_stmt ::=  "with" with_item ("," with_item)* ":" suite
+	# with_item ::=  expression ["as" target]
+	#
+	# The execution of the with statement with one "item" proceeds as follows:
+	# 1. The context expression (the expression given in the with_item) is evaluated to obtain a context
+	#    manager.
+	# 2. The context manager’s __exit__() is loaded for later use.
+	# 3. The context manager’s __enter__() method is invoked.
+	# 4. If a target was included in the with statement, the return value from __enter__() is assigned to
+	#    it. (e.g., testscript = open(testname, "w"))
+	# 5. The suite is executed. (e.g., testscript.write(''))
+	# 6. The context manager’s __exit__() method is invoked.
+
 	with open(testname, "w") as testscript:
 		testscript.write('#! /bin/bash\n'+
 	'TEST_NAME='+testname+'\n'+
@@ -314,6 +347,14 @@ def preSetting(config, bench, apps_name):
 			testscript.write('\n# Start the application server\n')
 			testscript.write('if [ $MY_XTERN"X" = "1X" ]; then\n')
 			testscript.write('LD_PRELOAD=$XTERN_ROOT/dync_hook/interpose.so \\\n')
+
+			# str.replace(old, new)
+			#    Return a copy of the string with all occurrences of substring old replaced by new.
+			# str.startswith(prefix)
+			#    Return True if string starts with the prefix, otherwise return False.
+			# str.split(sep)
+			#    Return a list of the words in the string, using sep as the delimiter string.
+
 			testscript.write('$MSMR_ROOT/apps/'+bench.split(' ')[0]+bench.split(' ')[1].replace('<port>',port)+' '+config.get(bench, 'SERVER_INPUT').replace('<port>', port)+' &> ../server'+port+'/${TEST_NAME}_0_${NO}_s${LOG_SUFFIX} &\nREAL_SERVER_PID_'+str(i)+'=$!\n')
 			testscript.write('else\n')
 			testscript.write('$MSMR_ROOT/apps/'+bench.split(' ')[0]+bench.split(' ')[1].replace('<port>',port)+' '+config.get(bench, 'SERVER_INPUT').replace('<port>', port)+' &> ../server'+port+'/${TEST_NAME}_0_${NO}_s${LOG_SUFFIX} &\nREAL_SERVER_PID_'+str(i)+'=$!\n')
@@ -573,6 +614,29 @@ if __name__ == "__main__":
 	Perf_Test_Flag = 0		
 	# end tom add 20150126
 
+	# Logger Objects
+	# Logger.setLevel(lvl)
+	#     Sets the threshold for this logger to lvl. Logging messages which are less severe than lvl will be ignored.
+	# Logger.debug(msg, *args, **kwargs)
+	#     Logs a message with level DEBUG on this logger.
+	# Logger.info(msg, *args, **kwargs)
+	#     Logs a message with level INFO on this logger.
+	# Logger.addHandler(hdlr)
+	#     Adds the specified handler hdlr to this logger.
+
+	# Handler Objects
+	# Handler.setLevel(lvl)
+	#     Sets the threshold for this handler to lvl. Logging messages which are less severe than lvl will be ignored.
+	# - StreamHandler
+	#   The StreamHandler class sends logging output to streams such as sys.stdout, sys.stderr or any file-like object.
+	#
+	#   class logging.StreamHandler(stream=None)
+	#   Returns a new instance of the StreamHandler class. If stream is specified, the instance will use it for logging
+	#   output; otherwise, sys.stderr will be used.
+	#
+	# - FileHandler
+	#   The FileHandler class sends logging output to a disk file. It inherits the output functionality from StreamHandler.
+
 	logger = logging.getLogger()
 	formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s","%Y%b%d-%H:%M:%S")
 	ch = logging.StreamHandler()
@@ -589,6 +653,36 @@ if __name__ == "__main__":
 		sys.exit(1)
 
 	APPS = os.path.abspath(MSMR_ROOT+"/")
+
+	# parse_args() means a simple Namespace object will be built up from attributes parsed out of the command line.
+	#
+	# ArgumentParser.add_argument(name or flags...[, action][, nargs][, default][, type][, help])
+	#
+	# 1. name or flags - Either a name or a list of option strings, e.g. foo or -f, --foo.
+	# 2. nargs - The number of command-line arguments that should be consumed.
+	#
+	#    '*'. All command-line arguments present are gathered into a list.
+	#    >>> parser = argparse.ArgumentParser()
+	#    >>> parser.add_argument('--foo', nargs='*')
+	#    >>> parser.add_argument('--bar', nargs='*')
+	#    >>> parser.add_argument('baz', nargs='*')
+	#    >>> parser.parse_args('a b --foo x y --bar 1 2'.split())
+	#    Namespace(bar=['1', '2'], baz=['a', 'b'], foo=['x', 'y'])
+	#
+	# 3. action
+	#
+	#    'store_true' and 'store_false'
+	#    >>> parser = argparse.ArgumentParser()
+	#    >>> parser.add_argument('--foo', action='store_true')
+	#    >>> parser.add_argument('--bar', action='store_false')
+	#    >>> parser.add_argument('--baz', action='store_false')
+	#    >>> parser.parse_args('--foo --bar'.split())
+	#    Namespace(bar=False, baz=True, foo=True)
+	#
+	# 4. default - The value produced if the argument is absent from the command line.
+	# 5. type - The type to which the command-line argument should be converted.
+	# 6. help - A brief description of what the argument does.
+
 	# parse input arguments
 	parser = argparse.ArgumentParser(
 		description = "Evaluate the performance of MSMR")
@@ -624,7 +718,7 @@ if __name__ == "__main__":
 
 	default_options = getMsmrDefaultOptions()
 	git_info = getGitInfo()
-	root_dir = os.getcwd()
+	root_dir = os.getcwd() # Return a string representing the current working directory.
 	# tom add 20150126
 	if args.v == True:
 		Perf_Test_Flag = 1
@@ -644,10 +738,10 @@ if __name__ == "__main__":
 			os.unlink('current')
 		except OSError:
 			pass
-		os.symlink(run_dir, 'current')
+		os.symlink(run_dir, 'current') # Create a symbolic link pointing to run_dir named current.
 		if not run_dir:
 			continue
-		os.chdir(run_dir)
+		os.chdir(run_dir) # Change the current working directory to run_dir.
 		if git_info[3]:
 			with open("git_diff", "w") as diff:
 				diff.write(git_info[3])
