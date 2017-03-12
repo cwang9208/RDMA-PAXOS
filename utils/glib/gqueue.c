@@ -2,7 +2,9 @@
  * pkg-config - Return metainformation about installed libraries
  * 
  * $ pkg-config --cflags glib-2.0
+ * -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
  * $ pkg-config --libs glib-2.0
+ * -lglib-2.0
  *
  * $ cc `pkg-config --cflags --libs glib-2.0` gqueue.c -o gqueue
  */
