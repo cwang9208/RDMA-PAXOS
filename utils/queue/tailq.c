@@ -1,6 +1,5 @@
 #include <sys/queue.h>
-#include <stdio.h>
-#include <stdlib.h>
+
 struct entry {
 	// element
 	TAILQ_ENTRY(entry)	entries;

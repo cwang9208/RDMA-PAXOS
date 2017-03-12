@@ -30,7 +30,7 @@ void *g_memdup(const void *ptr, unsigned size)
 
     dup = g_malloc(size);
     for (i = 0; i < size; i++)
-        dup[i] = ((unsigned char *)ptr)[i];
+        dup[i] = ((unsigned char *)ptr)[i]; // dup[i] = *(dup + i)
     return dup;
 }
 
