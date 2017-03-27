@@ -8,21 +8,28 @@ To build mcperf from distribution tarball:
     $ make
     $ sudo make install
 
+To build mcperf from distribution tarball in _debug mode_:
+
+    $ CFLAGS="-ggdb3 -O0" ./configure --enable-debug
+    $ make
+    $ sudo make install
+
 ## Help ##
 
-    Usage: mcperf [-s server] [-p port] [-l linger]
+    Usage: mcperf [-v verbosity level] [-o output file]
+                  [-s server] [-p port]
                   [-n num-conns] [-N num-calls]
-                  [-r conn-rate] [-R call-rate] [-z sizes]
+                  [-r conn-rate] [-R call-rate]
 
     Options:
+      -v, --verbosity=N     : set logging level (default: 5, min: 0, max: 11)
+      -o, --output=S        : set logging file (default: stderr)
       -s, --server=S        : set the hostname of the server (default: localhost)
       -p, --port=N          : set the port number of the server (default: 11211)
-      -l, --linger=N        : set the linger timeout in sec, when closing TCP connections (default: off)
       -n, --num-conns=N     : set the number of connections to create (default: 1)
       -N, --num-calls=N     : set the number of calls to create on each connection (default: 1)
       -r, --conn-rate=R     : set the connection creation rate (default: 0 conns/sec)
       -R, --call-rate=R     : set the call creation rate (default: 0 calls/sec)
-      -z, --sizes=R         : set the distribution for item sizes (default: d1 bytes)
 
       -q, --use-noreply     : set noreply for generated requests
       ...
@@ -49,6 +56,10 @@ every request is created after we have received the response for the previous
 request. All the set requests generated have a fixed item size of 1 byte.
 
     $ mcperf --linger=0 --conn-rate=0 --call-rate=0 --num-calls=100 --num-conns=100 --sizes=d1
+
+The following example gives you all the details of what mcperf is doing.
+
+    $ mcperf --call-rate=0 --num-calls=100 --num-conns=1 --verbosity=11
 
 ## Protocol ##
 
