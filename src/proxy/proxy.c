@@ -197,6 +197,25 @@ static int set_blocking(int fd, int blocking) {
     return 0;
 }
 
+static int set_socket_timeout(int fd, struct timeval *timeout) {
+	/*
+	 * SO_RCVTIMEO and SO_SNDTIMEO
+     * Specify the receiving or sending timeouts until reporting  an
+     * error. The argument is a struct timeval. If an input or output
+     * function blocks for this period of time, and data has been sent
+     * or received, the return value of that function will be the
+     * amount of data transferred; if no data has been transferred and
+     * the timeout has been reached then -1 is returned with errno set
+     * to EAGAIN or EWOULDBLOCK, or EINPROGRESS just as if the socket
+     * was specified to be nonblocking. If the timeout is set to zero
+     * (the default) then the operation will never timeout.
+	 */
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, timeout, sizeof(struct timeval)) < 0) {
+        perror("set_socket_timeout");
+    }
+    return 0;
+}
+
 void proxy_on_read(proxy_node* proxy, void* buf, ssize_t bytes_read, int fd)
 {
 	if (is_inner(pthread_self()))
