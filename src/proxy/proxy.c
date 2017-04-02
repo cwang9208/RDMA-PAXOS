@@ -15,7 +15,7 @@ static void do_action_to_server(uint16_t clt_id,uint8_t type,size_t data_size,vo
 static void do_action_send(uint16_t clt_id,size_t data_size,void* data,void* arg);
 static void do_action_connect(uint16_t clt_id,void* arg);
 static void do_action_close(uint16_t clt_id,void* arg);
-static int set_blocking(int fd, int blocking);
+static int set_socket_blocking(int fd, int blocking);
 
 FILE *log_fp;
 
@@ -162,6 +162,17 @@ static void leader_handle_submit_req(uint8_t type, ssize_t data_size, void* buf,
 
 static void get_socket_buffer_size(int sockfd)
 {
+    /* 
+     * TCP provides flow control. TCP always tells its peer exactly
+     * how many bytes of data it is willing to accept from the peer
+     * at any one time. This is called the advertised window.
+     * At any time, the window is the amount of room currently available
+     * in the receive buffer, guaranteeing that the sender cannot
+     * overflow the receiver buffer. The window changes dynamically over
+     * time: As data is received from the sender, the window size decreases,
+     * but as the receiving application reads data from the buffer, the
+     * window size increases.
+     */
     socklen_t i;
     size_t len;
 
@@ -179,7 +190,7 @@ static void get_socket_buffer_size(int sockfd)
     printf("send buffer size = %d\n", len);
 }
 
-static int set_blocking(int fd, int blocking) {
+static int set_socket_blocking(int fd, int blocking) {
     int flags;
 
     if ((flags = fcntl(fd, F_GETFL)) == -1) {
@@ -383,7 +394,7 @@ static void do_action_connect(uint16_t clt_id,void* arg)
         if (connect(ret->p_s, (struct sockaddr*)&proxy->sys_addr.s_addr, proxy->sys_addr.s_sock_len) < 0)
             fprintf(stderr, "ERROR connecting!\n");
 
-        set_blocking(ret->p_s, 0);
+        set_socket_blocking(ret->p_s, 0);
 
         int enable = 1;
         if(setsockopt(ret->p_s, IPPROTO_TCP, TCP_NODELAY, (void*)&enable, sizeof(enable)) < 0)
