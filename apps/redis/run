@@ -10,6 +10,14 @@
 # 1339518099.363765 [0 127.0.0.1:60866] "del" "x"
 # 1339518100.544926 [0 127.0.0.1:60866] "get" "x"
 
+
+# Measuring latency
+# showLatencyReport in redis-benchmark.c
+# for (i = 0; i < config.requests; i++) {
+#     # print config.latency
+# }
+
+
 ################################ SNAPSHOTTING  ################################
 #
 # Save the DB on disk:
